@@ -29,6 +29,7 @@
   .col { flex:1; min-width:0; background:var(--card-bg); border-radius:16px; box-shadow:var(--shadow); padding:1.8rem 2rem; max-height:70vh; overflow-y:auto; }
   .col-title { font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:#777; margin-bottom:1rem; border-left:4px solid var(--accent); padding-left:0.8rem; font-weight:700; }
   .col p { margin-bottom:1.3rem; font-size:1.05rem; }
+  .col img { max-width:100%; border-radius:8px; display:block; margin:0.8rem auto; box-shadow:0 2px 10px rgba(0,0,0,0.12); }
   .vocab-trigger { background:var(--vocab-bg); border-bottom:2px dotted #b66; cursor:pointer; font-weight:600; padding:0 0.15rem; transition:background 0.15s; }
   .vocab-trigger:hover { background:#ffe082; }
   .vocab-popup { position:fixed; z-index:200; background:#2d2d2d; color:#f0f0f0; border-radius:12px; padding:1rem 1.2rem; max-width:300px; font-size:0.9rem; line-height:1.5; box-shadow:0 12px 28px rgba(0,0,0,0.4); opacity:0; transform:translateY(5px); pointer-events:none; transition:opacity 0.2s, transform 0.2s; }
@@ -36,11 +37,29 @@
   .vocab-popup .zh { font-size:1.15rem; font-weight:700; color:#ffcc80; margin-bottom:0.3rem; }
   .popup-close { position:absolute; top:5px; right:10px; background:none; border:none; color:#aaa; cursor:pointer; font-size:1.2rem; }
   .quiz-box { background:#fff; border-radius:16px; padding:1.8rem; margin-top:2rem; box-shadow:var(--shadow); }
+  .quiz-item-wrapper { margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px dashed #eee; }
+  .rationale-container { font-size: 0.9rem; margin-top: 0.4rem; padding: 0.4rem 0.6rem; border-radius: 6px; display: none; background: #f8f9fa; line-height: 1.5; }
   .feedback { font-weight:600; margin-top:1rem; }
   .page-break { border-top:2px dashed #ccc; padding:1rem 0; text-align:center; color:#999; font-size:0.85rem; margin:1.5rem 0; }
-  footer { text-align:center; color:#777; font-size:0.8rem; margin-top:2rem; }
+  footer { text-align:center; color:#777; font-size:0.8rem; margin-top:2.5rem; padding:1.6rem 0 1.2rem; border-top:1px solid #eee; }
+  .wt-logo { font-family:"Segoe UI","Noto Sans SC","Microsoft YaHei",sans-serif; font-weight:700; font-size:1.25rem; color:#1b3a4b; letter-spacing:0.5px; margin-bottom:0.35rem; }
+  .wt-logo .wt-i { position:relative; display:inline-block; }
+  .wt-logo .wt-i::after { content:''; position:absolute; top:-7px; left:3px; width:6px; height:6px; border-radius:50%; background:#e6a817; }
+  .wt-underline { width:90px; height:3px; background:#e6a817; border-radius:0; margin:0.3rem auto 0.6rem; }
+  .wt-credit { font-size:0.8rem; color:#777; }
   #error-message { background: #ffe0e0; border: 1px solid red; padding: 1rem; border-radius: 8px; display: none; color: red; margin: 1rem 0; }
   #readingModeSelect { padding:0.3rem 0.8rem; border-radius:20px; border:1px solid #ccc; font-size:0.9rem; }
+  .paragraph-image { margin:1rem 0; }
+  .paragraph-image img { max-width:100%; border-radius:6px; }
+  .col p.reading-active { background:#fff3cd; box-shadow:0 0 0 4px #fff3cd; border-radius:4px; transition:background 0.25s ease; }
+  .speak-settings { display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:#555; }
+  .speak-settings select, .speak-settings input[type="range"] { vertical-align:middle; }
+  #voiceSelect { padding:0.25rem 0.5rem; border-radius:6px; border:1px solid #ccc; font-size:0.85rem; max-width:180px; }
+  #rateSlider { width:90px; }
+  .btn-icon { background:#fff; border:2px solid #1b3a4b; color:#1b3a4b; border-radius:50%; width:2.2rem; height:2.2rem; font-size:1rem; cursor:pointer; line-height:1; }
+  .page-nav-btn { background:#f5f5f5; border:1px solid #ddd; border-radius:6px; padding:0.4rem 1rem; cursor:pointer; font-size:0.9rem; }
+  .page-nav-btn:disabled { opacity:0.4; cursor:default; }
+  .page-nav-label { font-size:0.9rem; color:#777; margin:0 0.8rem; }
 </style>
 </head>
 <body>
@@ -48,15 +67,21 @@
 <div class="container">
   <div id="error-message"></div>
   <div class="toolbar">
-    <button class="btn" id="speakBtn">🔊 朗读本章原文</button>
-    <button class="btn btn-outline" id="simplifyToggle">📖 切换简化版</button>
-    <span class="simple-indicator" id="simpActiveLabel">(简化版)</span>
-    <span style="margin-left:auto; font-size:0.85rem; color:#555;">💡 点击黄色高亮词</span>
-    <label style="font-weight:400; margin-left:0.5rem;">阅读模式:
+    <button class="btn" id="speakBtn">🔊 朗读本节原文</button>
+    <button class="btn-icon" id="stopBtn" title="停止朗读" style="display:none;">⏹</button>
+    <button class="btn btn-outline" id="speakZhBtn">🔊 朗读中文翻译</button>
+    <div class="speak-settings">
+      <label>音色 <select id="voiceSelect"></select></label>
+      <label>速度 <input type="range" id="rateSlider" min="0.5" max="1.5" step="0.1" value="0.9"> <span id="rateLabel">0.9x</span></label>
+    </div>
+    <button class="btn btn-outline" id="simplifyToggle">📖 Switch to Simplified</button>
+    <span class="simple-indicator" id="simpActiveLabel">(Simplified Active)</span>
+    <span style="margin-left:auto; font-size:0.85rem; color:#555;">💡 Tap highlighted words</span>
+    <label style="font-weight:400; margin-left:0.5rem;">Mode:
       <select id="readingModeSelect">
-        <option value="sections">📑 分节 (若有)</option>
-        <option value="full">📖 全章节</option>
-        <option value="pages">📄 分页浏览</option>
+        <option value="sections">📑 Sections Mode</option>
+        <option value="full">📖 Full Chapter View</option>
+        <option value="pages">📄 Simulated Pages</option>
       </select>
     </label>
   </div>
@@ -65,17 +90,21 @@
   <div id="sectionProgress"></div>
 
   <div class="cols">
-    <div class="col" id="enCol"><div class="col-title">🇬🇧 English Original</div><div id="enContent"></div></div>
-    <div class="col" id="zhCol"><div class="col-title">🇨🇳 完整中文翻译</div><div id="zhContent"></div></div>
+    <div class="col" id="enCol"><div class="col-title">🇬🇧 English Version</div><div id="enContent"></div></div>
+    <div class="col" id="zhCol"><div class="col-title">🇨🇳 Chinese Translation</div><div id="zhContent"></div></div>
   </div>
 
   <div id="vocabPopup" class="vocab-popup"><button class="popup-close" id="closePopup">✕</button><div class="zh" id="popupZh"></div><div id="popupExplain"></div><div id="popupSimple" style="margin-top:0.4rem; font-style:italic;"></div></div>
 
-  <div class="quiz-box"><h3>❓ 理解检测</h3><div id="tfQuestions"></div><button class="btn" id="checkTfBtn">✅ 检查答案</button><div id="tfFeedback" class="feedback"></div></div>
+  <div class="quiz-box"><h3>❓ Comprehension Verification</h3><div id="tfQuestions"></div><button class="btn" id="checkTfBtn">✅ Check Answers</button><div id="tfFeedback" class="feedback"></div></div>
 
   <div id="progressBox" style="margin-top:1rem; font-size:0.9rem; color:#555;"></div>
 </div>
-<footer>📘 双语学习工具 · 原文版权归原作者所有 · 仅供教育用途 · Created by Daniel Wang (dwang055@gmail.com) </footer>
+<footer>
+  <div class="wt-logo">Words That Th<span class="wt-i">i</span>nk</div>
+  <div class="wt-underline"></div>
+  <div class="wt-credit">Created by Words That Think · © 2026 · For Educational Purposes Only</div>
+</footer>
 
 <script id="bookDataScript" type="application/json">{
   "title": "The Great Gatsby",
@@ -13232,22 +13261,26 @@
       return;
     }
     if (!bookData.chapters || !Array.isArray(bookData.chapters)) {
-      showError("bookData.chapters missing or not an array");
+      showError("Chapters data missing.");
       return;
     }
 
     let currentChapterIndex = null;
     let currentChapter = null;
     let currentSection = 0;
-    let currentQuiz = [];
+    let currentPage = 0;
     let isSimplified = false;
+    let speechState = 'idle'; // 'idle' | 'playing' | 'paused'
+    let readingColumn = 'en'; // 'en' | 'zh'
+    let readingRanges = [];
     let readingMode = 'sections';
     let currentVocabTrigger = null;
-
     const READING_MODE_KEY = bookData.title + "_readingMode";
     const PROGRESS_KEY = bookData.title + "_progress";
-
-    const placeholderQuiz = [{ text: "This section has no quiz yet.", answer: true }];
+    const VOICE_KEY = bookData.title + "_voice";
+    const RATE_KEY = bookData.title + "_rate";
+    const PAGE_SIZE = 6;
+    const placeholderQuiz = [{ text: "This section has no quiz yet.", answer: true, rationale: "" }];
 
     function detectReadingMode(ch) {
       const stored = localStorage.getItem(READING_MODE_KEY);
@@ -13258,7 +13291,9 @@
 
     const readingModeSelect = document.getElementById('readingModeSelect');
     readingModeSelect.addEventListener('change', () => {
+      stopSpeaking();
       readingMode = readingModeSelect.value;
+      currentPage = 0;
       localStorage.setItem(READING_MODE_KEY, readingMode);
       if (currentChapter) renderWithMode();
     });
@@ -13276,9 +13311,11 @@
     }
 
     function loadChapter(index) {
+      stopSpeaking();
       currentChapterIndex = index;
       currentChapter = bookData.chapters[index];
       currentSection = 0;
+      currentPage = 0;
       document.querySelector(".title").textContent = "📖 " + bookData.title + " – Ch. " + currentChapter.id;
       detectReadingMode(currentChapter);
       readingModeSelect.value = readingMode;
@@ -13303,118 +13340,103 @@
       document.getElementById('sectionProgress').textContent = '';
       const paragraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
       renderParagraphs(paragraphs);
-      const quiz = currentChapter.quiz || [];
-      renderQuiz(quiz);
+      renderQuiz(currentChapter.quiz || []);
     }
 
     function renderPagesMode() {
       document.getElementById('sectionTabs').innerHTML = '';
-      const paragraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
-      const pageSize = 6;
-      const totalPages = Math.ceil(paragraphs.length / pageSize);
-      document.getElementById('sectionProgress').textContent = '📄 Page 1 of ' + totalPages + ' (auto-split)';
-      const enDiv = document.getElementById('enContent');
-      const zhDiv = document.getElementById('zhContent');
-      enDiv.innerHTML = ''; zhDiv.innerHTML = '';
-      paragraphs.forEach((p, i) => {
-        if (i > 0 && i % pageSize === 0) {
-          const pageBreakEn = document.createElement('div');
-          pageBreakEn.className = 'page-break';
-          pageBreakEn.textContent = '📄 Page ' + (Math.floor(i/pageSize)+1);
-          enDiv.appendChild(pageBreakEn);
-          const pageBreakZh = document.createElement('div');
-          pageBreakZh.className = 'page-break';
-          pageBreakZh.textContent = '📄 Page ' + (Math.floor(i/pageSize)+1);
-          zhDiv.appendChild(pageBreakZh);
-        }
-        const enP = document.createElement('p');
-        enP.innerHTML = isSimplified ? (p.simpEn || '').replace(/<[^>]*>/g, '') : p.en;
-        enDiv.appendChild(enP);
-        const zhP = document.createElement('p');
-        zhP.textContent = isSimplified ? p.simpZh : p.zh;
-        zhDiv.appendChild(zhP);
-      });
-      const quiz = currentChapter.quiz || [];
-      renderQuiz(quiz);
+      const allParagraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
+      const totalPages = Math.max(1, Math.ceil(allParagraphs.length / PAGE_SIZE));
+      if (currentPage >= totalPages) currentPage = totalPages - 1;
+      if (currentPage < 0) currentPage = 0;
+      const pageParagraphs = allParagraphs.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+      renderParagraphs(pageParagraphs);
+
+      const progress = document.getElementById('sectionProgress');
+      progress.innerHTML = '';
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-nav-btn'; prevBtn.textContent = '⬅ 上一页';
+      prevBtn.disabled = currentPage === 0;
+      prevBtn.addEventListener('click', () => { stopSpeaking(); currentPage--; renderPagesMode(); saveFullProgress(); });
+      const label = document.createElement('span');
+      label.className = 'page-nav-label';
+      label.textContent = '📄 Page ' + (currentPage + 1) + ' of ' + totalPages;
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-nav-btn'; nextBtn.textContent = '下一页 ➡';
+      nextBtn.disabled = currentPage >= totalPages - 1;
+      nextBtn.addEventListener('click', () => { stopSpeaking(); currentPage++; renderPagesMode(); saveFullProgress(); });
+      progress.appendChild(prevBtn);
+      progress.appendChild(label);
+      progress.appendChild(nextBtn);
+
+      renderQuiz(currentChapter.quiz || []);
     }
 
     function renderSectionsMode() {
       const sections = currentChapter.sections;
-      if (!sections || sections.length === 0) {
-        renderFullMode();
-        return;
-      }
+      if (!sections || sections.length === 0) { renderFullMode(); return; }
       const tabContainer = document.getElementById('sectionTabs');
       tabContainer.innerHTML = '';
       sections.forEach((sec, idx) => {
         const tab = document.createElement('button');
-        tab.className = 'section-tab';
-        if (idx === currentSection) tab.classList.add('active');
+        tab.className = 'section-tab'; if (idx === currentSection) tab.classList.add('active');
         tab.textContent = (idx+1) + '. ' + sec.heading;
-        tab.setAttribute('role', 'tab');
-        tab.setAttribute('aria-selected', idx === currentSection ? 'true' : 'false');
-        tab.setAttribute('tabindex', idx === currentSection ? '0' : '-1');
-        tab.addEventListener('click', () => {
-          currentSection = idx;
-          renderSectionsMode();
-          saveFullProgress();
-        });
+        tab.addEventListener('click', () => { stopSpeaking(); currentSection = idx; renderSectionsMode(); saveFullProgress(); });
         tabContainer.appendChild(tab);
       });
-      const tabs = Array.from(tabContainer.querySelectorAll('.section-tab'));
-      tabContainer.addEventListener('keydown', (e) => {
-        const idx = tabs.indexOf(document.activeElement);
-        if (idx === -1) return;
-        if (e.key === 'ArrowRight' && idx < tabs.length-1) {
-          e.preventDefault();
-          tabs[idx+1].focus();
-          tabs[idx+1].click();
-        } else if (e.key === 'ArrowLeft' && idx > 0) {
-          e.preventDefault();
-          tabs[idx-1].focus();
-          tabs[idx-1].click();
-        }
-      });
-
       document.getElementById('sectionProgress').textContent = 'Section ' + (currentSection+1) + ' of ' + sections.length;
-
-      const sec = sections[currentSection];
-      renderParagraphs(sec.paragraphs);
-      renderQuiz(sec.quiz || []);
+      renderParagraphs(sections[currentSection].paragraphs);
+      renderQuiz(sections[currentSection].quiz || []);
     }
 
+    // ----- KEY FIX: renderParagraphs now handles "image" field -----
     function renderParagraphs(paragraphs) {
       const enDiv = document.getElementById('enContent');
       const zhDiv = document.getElementById('zhContent');
-      enDiv.innerHTML = '';
-      zhDiv.innerHTML = '';
+      enDiv.innerHTML = ''; zhDiv.innerHTML = '';
       paragraphs.forEach(p => {
-        const enP = document.createElement('p');
-        enP.innerHTML = isSimplified ? (p.simpEn || '').replace(/<[^>]*>/g, '') : p.en;
+        // If there is an image property, show it before the English text
+        if (p.image) {
+          const imgDiv = document.createElement('div');
+          imgDiv.className = 'paragraph-image';
+          imgDiv.innerHTML = '<img src="' + p.image + '" alt="illustration">';
+          enDiv.appendChild(imgDiv);
+        }
+        const enContent = isSimplified ? (p.simpEn || '').replace(/<[^>]*>/g, '') : p.en;
+        const enP = document.createElement('p'); enP.innerHTML = enContent;
         enDiv.appendChild(enP);
-        const zhP = document.createElement('p');
-        zhP.textContent = isSimplified ? p.simpZh : p.zh;
+        const zhP = document.createElement('p'); zhP.textContent = isSimplified ? p.simpZh : p.zh;
         zhDiv.appendChild(zhP);
       });
     }
 
+    // ----- Quiz rendering (unchanged, includes rationale) -----
     function renderQuiz(quizArr) {
       const tfContainer = document.getElementById('tfQuestions');
       tfContainer.innerHTML = '';
       const quizToUse = (quizArr && quizArr.length) ? quizArr : placeholderQuiz;
-      quizToUse.forEach((q,i) => {
-        const div = document.createElement('div'); div.style.margin='0.5rem 0';
-        div.innerHTML = (i+1) + ". " + q.text + " <select class='tf-sel'><option value=''>选</option><option value='true'>True</option><option value='false'>False</option></select>";
+      quizToUse.forEach((q, i) => {
+        const div = document.createElement('div'); div.className = 'quiz-item-wrapper';
+        div.innerHTML = `
+          <div><strong>${i+1}.</strong> ${q.text}
+            <select class='tf-sel' style='width:auto; display:inline-block; margin-left:0.5rem; padding:0.2rem 0.5rem;'>
+              <option value=''>--</option><option value='true'>True</option><option value='false'>False</option>
+            </select>
+          </div>
+          <div class='rationale-container'></div>
+        `;
         tfContainer.appendChild(div);
       });
       document.getElementById('tfFeedback').textContent = '';
     }
 
+    // ... rest of reader JS unchanged (simplify, speak, check quiz, progress) ...
     document.getElementById('simplifyToggle').addEventListener('click', () => {
+      stopSpeaking();
       isSimplified = !isSimplified;
       document.getElementById('simpActiveLabel').classList.toggle('active', isSimplified);
       if (currentChapter) renderWithMode();
-      document.getElementById('simplifyToggle').textContent = isSimplified ? '📖 切换回原文' : '📖 切换简化版';
+      document.getElementById('simplifyToggle').textContent = isSimplified ? '📖 Switch back to Original' : '📖 Switch to Simplified';
       hidePopup();
     });
 
@@ -13435,23 +13457,162 @@
     function hidePopup() { popup.classList.remove('show'); currentVocabTrigger = null; }
     document.addEventListener('click', function(e) {
       const trig = e.target.closest('.vocab-trigger');
-      if (trig && trig !== currentVocabTrigger) {
-        e.stopPropagation();
-        showPopup(trig, trig.getAttribute('data-vocab'));
-      } else if (trig === currentVocabTrigger) hidePopup();
+      if (trig && trig !== currentVocabTrigger) { e.stopPropagation(); showPopup(trig, trig.getAttribute('data-vocab')); }
+      else if (trig === currentVocabTrigger) hidePopup();
       else if (!e.target.closest('#vocabPopup')) hidePopup();
     });
     document.getElementById('closePopup').addEventListener('click', (e) => { e.stopPropagation(); hidePopup(); });
     window.addEventListener('scroll', () => { if (currentVocabTrigger) hidePopup(); });
 
-    document.getElementById('speakBtn').addEventListener('click', () => {
-      if (!window.speechSynthesis) return alert('浏览器不支持朗读。');
-      speechSynthesis.cancel();
-      const paragraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
-      const text = paragraphs.map(p => p.en.replace(/<[^>]*>/g, '')).join(' ');
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9;
-      speechSynthesis.speak(u);
+    // ----- Text-to-speech: voices, rate, highlighting, play/pause/stop -----
+    function populateVoices() {
+      if (!window.speechSynthesis) return;
+      const voices = speechSynthesis.getVoices().filter(v => v.lang.toLowerCase().startsWith('en'));
+      const voiceSelect = document.getElementById('voiceSelect');
+      if (!voices.length) return;
+      const previousValue = voiceSelect.value;
+      voiceSelect.innerHTML = '';
+      voices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = v.name + ' (' + v.lang + ')';
+        voiceSelect.appendChild(opt);
+      });
+      const saved = localStorage.getItem(VOICE_KEY);
+      if (saved && voices.some(v => v.name === saved)) voiceSelect.value = saved;
+      else if (previousValue && voices.some(v => v.name === previousValue)) voiceSelect.value = previousValue;
+    }
+    if (window.speechSynthesis) {
+      populateVoices();
+      speechSynthesis.onvoiceschanged = populateVoices;
+    }
+    const voiceSelect = document.getElementById('voiceSelect');
+    voiceSelect.addEventListener('change', () => localStorage.setItem(VOICE_KEY, voiceSelect.value));
+
+    const rateSlider = document.getElementById('rateSlider');
+    const rateLabel = document.getElementById('rateLabel');
+    const savedRate = parseFloat(localStorage.getItem(RATE_KEY));
+    if (!isNaN(savedRate)) rateSlider.value = savedRate;
+    rateLabel.textContent = rateSlider.value + 'x';
+    rateSlider.addEventListener('input', () => {
+      rateLabel.textContent = rateSlider.value + 'x';
+      localStorage.setItem(RATE_KEY, rateSlider.value);
     });
+
+    function getCurrentParagraphs() {
+      if (readingMode === 'sections' && currentChapter.sections && currentChapter.sections.length > 0) {
+        return currentChapter.sections[currentSection].paragraphs || [];
+      } else if (readingMode === 'pages') {
+        const all = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
+        return all.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+      }
+      return currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
+    }
+
+    function buildSpeechData(paragraphs, lang) {
+      let text = '';
+      const ranges = [];
+      paragraphs.forEach((p, idx) => {
+        let raw;
+        if (lang === 'en') raw = (isSimplified ? (p.simpEn || '') : (p.en || '')).replace(/<[^>]*>/g, '');
+        else raw = isSimplified ? (p.simpZh || '') : (p.zh || '');
+        raw = (raw || '').trim();
+        const start = text.length;
+        if (raw) text += raw + '. ';
+        ranges.push({ start: start, end: text.length, idx: idx });
+      });
+      return { text: text.trim(), ranges: ranges };
+    }
+
+    function clearHighlight() {
+      document.querySelectorAll('.reading-active').forEach(el => el.classList.remove('reading-active'));
+    }
+
+    function highlightParagraph(pIdx, column) {
+      const div = document.getElementById(column === 'zh' ? 'zhContent' : 'enContent');
+      const ps = div.querySelectorAll('p');
+      clearHighlight();
+      const el = ps[pIdx];
+      if (el) el.classList.add('reading-active');
+    }
+
+    function updateSpeakButtons() {
+      const speakBtn = document.getElementById('speakBtn');
+      const speakZhBtn = document.getElementById('speakZhBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      speakBtn.textContent = '🔊 朗读本节原文';
+      speakZhBtn.textContent = '🔊 朗读中文翻译';
+      stopBtn.style.display = speechState === 'idle' ? 'none' : 'inline-block';
+      if (speechState === 'playing') {
+        if (readingColumn === 'en') speakBtn.textContent = '⏸ 暂停朗读';
+        else speakZhBtn.textContent = '⏸ 暂停朗读';
+      } else if (speechState === 'paused') {
+        if (readingColumn === 'en') speakBtn.textContent = '▶ 继续朗读';
+        else speakZhBtn.textContent = '▶ 继续朗读';
+      }
+    }
+
+    function resetSpeechState() {
+      speechState = 'idle';
+      clearHighlight();
+      updateSpeakButtons();
+    }
+
+    function stopSpeaking() {
+      if (window.speechSynthesis) speechSynthesis.cancel();
+      resetSpeechState();
+    }
+
+    function startSpeaking(lang) {
+      const paragraphs = getCurrentParagraphs();
+      const data = buildSpeechData(paragraphs, lang);
+      if (!data.text) return;
+      readingRanges = data.ranges;
+      readingColumn = lang;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(data.text);
+      u.rate = parseFloat(rateSlider.value) || 0.9;
+      if (lang === 'en') {
+        u.lang = 'en-US';
+        const voices = speechSynthesis.getVoices();
+        const chosen = voices.find(v => v.name === voiceSelect.value) || voices.find(v => v.lang.toLowerCase().startsWith('en'));
+        if (chosen) u.voice = chosen;
+      } else {
+        u.lang = 'zh-CN';
+      }
+      u.onboundary = (e) => {
+        if (e.charIndex == null) return;
+        const r = readingRanges.find(r => e.charIndex >= r.start && e.charIndex < r.end);
+        if (r) highlightParagraph(r.idx, lang);
+      };
+      u.onend = resetSpeechState;
+      u.onerror = resetSpeechState;
+      speechSynthesis.speak(u);
+      speechState = 'playing';
+      updateSpeakButtons();
+    }
+
+    function handleSpeakClick(lang) {
+      if (!window.speechSynthesis) return alert('TTS not supported.');
+      if (speechState === 'idle') {
+        startSpeaking(lang);
+      } else if (readingColumn !== lang) {
+        startSpeaking(lang);
+      } else if (speechState === 'playing') {
+        speechSynthesis.pause();
+        speechState = 'paused';
+        updateSpeakButtons();
+      } else if (speechState === 'paused') {
+        speechSynthesis.resume();
+        speechState = 'playing';
+        updateSpeakButtons();
+      }
+    }
+
+    document.getElementById('speakBtn').addEventListener('click', () => handleSpeakClick('en'));
+    document.getElementById('speakZhBtn').addEventListener('click', () => handleSpeakClick('zh'));
+    document.getElementById('stopBtn').addEventListener('click', stopSpeaking);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopSpeaking(); });
 
     document.getElementById('checkTfBtn').addEventListener('click', () => {
       const quizArr = currentChapter.sections && readingMode==='sections' ? (currentChapter.sections[currentSection]?.quiz || []) : (currentChapter.quiz || []);
@@ -13459,20 +13620,29 @@
       let correct = 0;
       document.querySelectorAll('.tf-sel').forEach((sel, i) => {
         const val = sel.value;
-        if ((val === 'true' && quizToUse[i].answer) || (val === 'false' && !quizToUse[i].answer)) {
+        const currentItem = quizToUse[i];
+        const wrapper = sel.closest('.quiz-item-wrapper');
+        const ratBox = wrapper.querySelector('.rationale-container');
+        if (val === '') { sel.style.border = '1px solid #ccc'; ratBox.style.display = 'none'; return; }
+        const userTrue = (val === 'true');
+        const correctChoice = (userTrue === currentItem.answer);
+        ratBox.style.display = 'block';
+        if (correctChoice) {
           sel.style.border = '2px solid green';
           correct++;
-        } else sel.style.border = '2px solid red';
+          ratBox.style.borderLeft = '4px solid green';
+          ratBox.innerHTML = '<span style="color:green; font-weight:bold;">✓ Correct.</span> ' + (currentItem.rationale || '');
+        } else {
+          sel.style.border = '2px solid red';
+          ratBox.style.borderLeft = '4px solid red';
+          ratBox.innerHTML = '<span style="color:red; font-weight:bold;">✗ Incorrect.</span> ' + (currentItem.rationale || '');
+        }
       });
-      document.getElementById('tfFeedback').textContent = '✅ 正确 ' + correct + ' / ' + quizToUse.length;
+      document.getElementById('tfFeedback').textContent = 'Score: ' + correct + ' / ' + quizToUse.length;
     });
 
     function saveFullProgress() {
-      const state = {
-        chapterIndex: currentChapterIndex,
-        sectionIndex: (readingMode === 'sections' && currentChapter.sections) ? currentSection : 0,
-        readingMode: readingMode
-      };
+      const state = { chapterIndex: currentChapterIndex, sectionIndex: (readingMode==='sections' && currentChapter.sections) ? currentSection : 0, pageIndex: (readingMode==='pages') ? currentPage : 0, readingMode };
       localStorage.setItem(PROGRESS_KEY, JSON.stringify(state));
       updateProgressIndicator();
     }
@@ -13484,9 +13654,9 @@
           const state = JSON.parse(saved);
           const ch = bookData.chapters[state.chapterIndex];
           if (ch) {
-            let info = '📌 上次读到: Ch. ' + ch.id;
+            let info = '📌 Last read: Ch. ' + ch.id;
             if (ch.sections && state.sectionIndex) info += ' · ' + ch.sections[state.sectionIndex].heading;
-            info += ' | ' + (state.chapterIndex+1) + '/' + bookData.chapters.length + ' 章';
+            info += ' | ' + (state.chapterIndex+1) + '/' + bookData.chapters.length + ' chapters';
             document.getElementById('progressBox').textContent = info;
           }
         } catch(e) {}
@@ -13498,15 +13668,17 @@
       if (saved) {
         try {
           const state = JSON.parse(saved);
-          const chIndex = state.chapterIndex;
-          if (chIndex >= 0 && chIndex < bookData.chapters.length) {
-            document.getElementById('chapterSelect').value = chIndex;
+          if (state.chapterIndex >= 0 && state.chapterIndex < bookData.chapters.length) {
+            document.getElementById('chapterSelect').value = state.chapterIndex;
             readingMode = state.readingMode || 'sections';
             readingModeSelect.value = readingMode;
-            loadChapter(chIndex);
-            if (readingMode === 'sections' && bookData.chapters[chIndex].sections) {
+            loadChapter(state.chapterIndex);
+            if (readingMode === 'sections' && bookData.chapters[state.chapterIndex].sections) {
               currentSection = state.sectionIndex || 0;
               renderSectionsMode();
+            } else if (readingMode === 'pages') {
+              currentPage = state.pageIndex || 0;
+              renderPagesMode();
             }
             return;
           }
