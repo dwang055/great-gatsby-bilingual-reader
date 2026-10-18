@@ -5,191 +5,274 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Great Gatsby – Bilingual Reader</title>
 <style>
-  :root {
-    --primary:#1b3a4b; --accent:#c44536; --bg:#f9f5f0; --card-bg:#fff; --text:#2c2c2c;
-    --vocab-bg:#fffaec; --shadow:0 2px 12px rgba(0,0,0,0.05);
-    --top-bar-bg:#0b1c26; --top-bar-text:#fff;
-    --tab-bg:#f5f5f5; --tab-border:#ddd; --tab-active-bg:var(--primary); --tab-active-text:#fff;
-    --toolbar-bg:#fff; --col-title-color:#777; --progress-bar-bg:#e0e0e0;
-    --toggle-border:var(--primary); --toggle-active-bg:var(--primary); --toggle-text:var(--primary);
-    --footer-border:#eee; --footer-text:#777; --mark-read-bg:#e8f5e9; --mark-read-border:#4caf50;
-    --font-size:1.05rem;
-  }
-  body.night {
-    --bg:#0d1b2a; --card-bg:#122030; --text:#d8e8f0; --vocab-bg:#1a2e3d;
-    --shadow:0 2px 12px rgba(0,0,0,0.4);
-    --top-bar-bg:#051018; --top-bar-text:#e6a817;
-    --tab-bg:#1a2e3d; --tab-border:#2a4055; --tab-active-bg:#e6a817; --tab-active-text:#0b1c26;
-    --toolbar-bg:#122030; --col-title-color:#7eb8d4; --progress-bar-bg:#1a2e3d;
-    --toggle-border:#e6a817; --toggle-active-bg:#e6a817; --toggle-text:#e6a817;
-    --footer-border:#1a2e3d; --footer-text:#5a8fa8;
-    --mark-read-bg:#1a3020; --mark-read-border:#4caf50;
-    --primary:#e6a817; --accent:#e6a817;
-  }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:"Segoe UI","Noto Sans SC","Microsoft YaHei",Georgia,serif; background:var(--bg); color:var(--text); line-height:1.7; transition:background 0.3s,color 0.3s; font-size:var(--font-size); }
-  .top-bar { background:var(--top-bar-bg); color:var(--top-bar-text); padding:0.6rem 1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; position:sticky; top:0; z-index:100; }
+  :root { --primary: #1b3a4b; --accent: #c44536; --bg: #f9f5f0; --card-bg: #fff; --text: #2c2c2c; --vocab-bg: #fffaec; --vocab-border: #e6a817; --shadow: 0 2px 12px rgba(0,0,0,0.05); --font-scale: 1; }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html { overflow-x:hidden; overflow-anchor:none; }
+  body { font-family: "Segoe UI","Noto Sans SC","Microsoft YaHei",Georgia,serif; background:var(--bg); color:var(--text); line-height:1.7; overflow-x:hidden; width:100%; overflow-anchor:none; transition:background 0.2s, color 0.2s; }
+  body.dark-mode { background:#1e1e2a; color:#e8e8ed; --card-bg:#2a2a3a; --vocab-bg:#3a3a4a; --shadow:0 2px 12px rgba(0,0,0,0.3); }
+  body.dark-mode .top-bar { background:#0b0b12; }
+  body.dark-mode .toolbar { background:#2a2a3a; }
+  body.dark-mode .btn-outline { background:#2a2a3a; color:#e8e8ed; border-color:#5a5a7a; }
+  body.dark-mode .btn-outline:hover { background:#3a3a5a; }
+  body.dark-mode .section-tab { background:#2a2a3a; border-color:#4a4a5a; color:#c8c8d0; }
+  body.dark-mode .section-tab.active { background:var(--primary); color:#fff; }
+  body.dark-mode .col { background:var(--card-bg); box-shadow:var(--shadow); }
+  body.dark-mode .vocab-trigger { background:var(--vocab-bg); border-bottom-color:#a80; }
+  body.dark-mode .vocab-trigger:hover { background:#5a4a2a; }
+  body.dark-mode .quiz-box { background:var(--card-bg); }
+  body.dark-mode .wt-logo { color:#e8e8ed; }
+  body.dark-mode .wt-credit { color:#aaa; }
+  body.dark-mode footer { border-top-color:#3a3a4a; }
+  body.dark-mode .page-nav-btn { background:#2a2a3a; border-color:#4a4a5a; color:#e8e8ed; }
+  body.dark-mode .page-nav-btn:disabled { opacity:0.3; }
+  .top-bar { background:#0b1c26; color:#fff; padding:0.6rem 1.4rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; position:sticky; top:0; z-index:100; }
   .top-bar .title { font-weight:bold; font-size:1.1rem; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .top-bar select { padding:0.4rem 0.6rem; border-radius:4px; border:none; font-size:0.85rem; background:#fff; color:#0b1c26; cursor:pointer; max-width:180px; }
-  /* Progress bar */
-  #bookProgressBar { height:4px; background:var(--progress-bar-bg); width:100%; }
-  #bookProgressFill { height:4px; background:#e6a817; width:0%; transition:width 0.4s ease; }
-  #bookProgressLabel { font-size:0.78rem; color:#e6a817; padding:0.15rem 1.4rem; background:var(--top-bar-bg); text-align:right; }
   .container { max-width:1400px; margin:0 auto; padding:1rem 1rem 2rem; }
-  /* Book description */
-  #bookDescription { font-size:0.95rem; color:var(--col-title-color); background:var(--card-bg); border-radius:10px; padding:0.8rem 1.2rem; margin-bottom:0.8rem; box-shadow:var(--shadow); font-style:italic; display:none; }
-  /* Toolbar */
-  .toolbar { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; background:var(--toolbar-bg); padding:0.6rem 1rem; border-radius:12px; margin:0.6rem 0; box-shadow:var(--shadow); }
-  .btn { background:var(--primary); color:#fff; border:none; padding:0.5rem 1.1rem; border-radius:30px; font-weight:600; cursor:pointer; font-size:0.9rem; white-space:nowrap; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; background:#fff; padding:0.7rem 1rem; border-radius:12px; margin:0.8rem 0; box-shadow:var(--shadow); transition:background 0.2s; }
+  .btn { background:#1b3a4b; color:#fff; border:none; padding:0.5rem 1.1rem; border-radius:30px; font-weight:600; cursor:pointer; font-size:0.9rem; white-space:nowrap; }
   .btn:active { opacity:0.85; }
-  .btn-outline { background:transparent; border:2px solid var(--primary); color:var(--primary); }
-  .btn-outline:hover { opacity:0.8; }
+  .btn-outline { background:#fff; border:2px solid #1b3a4b; color:#1b3a4b; }
+  .btn-outline:hover { background:#f0f5f9; }
   .simple-indicator { font-size:0.8rem; color:#ac7339; display:none; margin:0 0.3rem; }
   .simple-indicator.active { display:inline; }
-  /* Font size controls */
-  .font-controls { display:flex; align-items:center; gap:0.3rem; }
-  .font-btn { background:var(--toolbar-bg); border:1px solid var(--tab-border); color:var(--text); border-radius:6px; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.95rem; min-width:32px; }
-  /* Night mode toggle */
-  .night-btn { font-size:1rem; padding:0.4rem 0.7rem; }
-  /* Section tabs */
-  #sectionTabs { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; border-bottom:2px solid var(--tab-border); padding-bottom:0.8rem; scrollbar-width:none; }
+  #sectionTabs { display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; border-bottom:2px solid #ddd; padding-bottom:0.8rem; scrollbar-width:none; }
   #sectionTabs::-webkit-scrollbar { display:none; }
-  .section-tab { padding:0.65rem 1.1rem; background:var(--tab-bg); border:1px solid var(--tab-border); border-radius:8px; cursor:pointer; font-size:0.9rem; white-space:nowrap; transition:all 0.2s; min-height:44px; color:var(--text); }
-  .section-tab.active { background:var(--tab-active-bg); color:var(--tab-active-text); border-color:var(--tab-active-bg); }
-  .section-tab.read { border-left:4px solid #4caf50; }
-  #sectionProgress { font-size:0.9rem; color:var(--col-title-color); margin-bottom:0.8rem; }
-  /* Columns */
+  .section-tab { padding:0.65rem 1.1rem; background:#f5f5f5; border:1px solid #ddd; border-radius:8px; cursor:pointer; font-size:0.9rem; white-space:nowrap; transition:all 0.2s; min-height:44px; }
+  .section-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+  .section-tab:hover:not(.active) { background:#e8e8e8; }
+  #sectionProgress { font-size:0.9rem; color:#777; margin-bottom:0.8rem; }
   .cols { display:flex; gap:2rem; margin:1rem 0; }
-  .col { flex:1; min-width:0; background:var(--card-bg); border-radius:16px; box-shadow:var(--shadow); padding:1.6rem 1.8rem; max-height:70vh; overflow-y:auto; }
-  .col-title { font-size:0.82rem; text-transform:uppercase; letter-spacing:1px; color:var(--col-title-color); margin-bottom:1rem; border-left:4px solid var(--accent); padding-left:0.8rem; font-weight:700; }
-  .col p { margin-bottom:1.3rem; }
+  .col { flex:1; min-width:0; background:var(--card-bg); border-radius:16px; box-shadow:var(--shadow); padding:1.6rem 1.8rem; max-height:70vh; overflow-y:auto; transition:background 0.2s, box-shadow 0.2s; }
+  .col-title { font-size:0.82rem; text-transform:uppercase; letter-spacing:1px; color:#777; margin-bottom:1rem; border-left:4px solid var(--accent); padding-left:0.8rem; font-weight:700; }
+  .col p { margin-bottom:1.3rem; font-size:calc(1.05rem * var(--font-scale)); line-height:1.75; overflow-wrap:break-word; word-break:break-word; }
   .col img { max-width:100%; border-radius:8px; display:block; margin:0.8rem auto; box-shadow:0 2px 10px rgba(0,0,0,0.12); }
-  /* Mark as read */
-  .mark-read-bar { background:var(--mark-read-bg); border:1px solid var(--mark-read-border); border-radius:10px; padding:0.7rem 1.2rem; margin-top:1.2rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-  .mark-read-bar button { background:#4caf50; color:#fff; border:none; border-radius:20px; padding:0.45rem 1.1rem; font-weight:700; cursor:pointer; font-size:0.9rem; }
-  .mark-read-bar button.unmark { background:#888; }
-  .mark-read-bar .read-label { font-size:0.9rem; color:var(--text); }
-  /* Bookmark */
-  .bookmark-bar { display:flex; align-items:center; gap:0.6rem; font-size:0.85rem; color:var(--col-title-color); margin-bottom:0.5rem; flex-wrap:wrap; }
-  /* Mobile */
-  .lang-toggle-bar { display:none; gap:0; margin:0.8rem 0; border-radius:10px; overflow:hidden; border:2px solid var(--toggle-border); }
-  .lang-toggle-btn { flex:1; padding:0.75rem; font-size:1rem; font-weight:700; background:transparent; color:var(--toggle-text); border:none; cursor:pointer; transition:background 0.2s,color 0.2s; }
-  .lang-toggle-btn.active { background:var(--toggle-active-bg); color:#fff; }
+  .lang-toggle-bar { display:none; gap:0; margin:0.8rem 0; border-radius:10px; overflow:hidden; border:2px solid var(--primary); }
+  .lang-toggle-btn { flex:1; padding:0.75rem; font-size:1rem; font-weight:700; background:#fff; color:var(--primary); border:none; cursor:pointer; transition:background 0.2s, color 0.2s; }
+  .lang-toggle-btn.active { background:var(--primary); color:#fff; }
   @media (max-width:640px) {
     .cols { display:block; }
     .col { max-height:none; overflow-y:visible; border-radius:12px; padding:1.2rem 1rem; margin-bottom:0; display:none; }
     .col.mobile-visible { display:block; }
     .lang-toggle-bar { display:flex; }
-    .toolbar { gap:0.4rem; padding:0.5rem 0.7rem; }
-    .top-bar .title { font-size:0.9rem; }
-    .section-tab { font-size:0.82rem; padding:0.55rem 0.8rem; }
-    .quiz-box { display:none; }
+    .toolbar { gap:0.5rem; padding:0.6rem 0.8rem; }
+    .top-bar .title { font-size:0.95rem; }
+    .section-tab { font-size:0.85rem; padding:0.6rem 0.9rem; }
     .vocab-popup { left:1rem !important; right:1rem !important; width:auto !important; max-width:none !important; bottom:1rem; top:auto !important; }
+    .note-editor-popup { left:1rem !important; right:1rem !important; width:auto !important; max-width:none !important; bottom:1rem; top:auto !important; }
+    .sel-toolbar { left:1rem !important; right:1rem !important; top:auto !important; bottom:1rem !important; width:auto; justify-content:center; }
+    #sectionAudioBar { flex-wrap:wrap; }
+    #sectionAudio { flex:1 1 100%; }
   }
-  /* Vocab */
   .vocab-trigger { background:var(--vocab-bg); border-bottom:2px dotted #b66; cursor:pointer; font-weight:600; padding:0 0.15rem; transition:background 0.15s; }
   .vocab-trigger:hover, .vocab-trigger:active { background:#ffe082; }
-  .vocab-popup { position:fixed; z-index:200; background:#2d2d2d; color:#f0f0f0; border-radius:12px; padding:1rem 1.2rem; max-width:300px; font-size:0.9rem; line-height:1.5; box-shadow:0 12px 28px rgba(0,0,0,0.4); opacity:0; transform:translateY(5px); pointer-events:none; transition:opacity 0.2s,transform 0.2s; }
+  .vocab-popup { position:fixed; z-index:200; background:#2d2d2d; color:#f0f0f0; border-radius:12px; padding:1rem 1.2rem; max-width:300px; font-size:0.9rem; line-height:1.5; box-shadow:0 12px 28px rgba(0,0,0,0.4); opacity:0; transform:translateY(5px); pointer-events:none; transition:opacity 0.2s, transform 0.2s; }
   .vocab-popup.show { opacity:1; transform:translateY(0); pointer-events:auto; }
-  .vocab-popup .zh { font-size:1.15rem; font-weight:700; color:#ffcc80; margin-bottom:0.3rem; }
+  .vocab-popup .zh-row { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem; }
+  .vocab-popup .zh { font-size:1.15rem; font-weight:700; color:#ffcc80; }
+  .vocab-popup .ipa { font-size:0.85rem; color:#9fd8ff; font-style:italic; margin-bottom:0.3rem; }
   .popup-close { position:absolute; top:5px; right:10px; background:none; border:none; color:#aaa; cursor:pointer; font-size:1.4rem; padding:0.2rem; }
-  /* Quiz */
-  .quiz-box { background:var(--card-bg); border-radius:16px; padding:1.6rem; margin-top:1.5rem; box-shadow:var(--shadow); }
-  .quiz-item-wrapper { margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px dashed var(--tab-border); }
-  .rationale-container { font-size:0.9rem; margin-top:0.4rem; padding:0.4rem 0.6rem; border-radius:6px; display:none; background:var(--tab-bg); line-height:1.5; }
+  .popup-speak { background:#444; border:none; color:#ffcc80; cursor:pointer; font-size:1rem; padding:0.15rem 0.45rem; border-radius:20px; line-height:1; }
+  .popup-speak:hover, .popup-speak:active { background:#5a4a2a; }
+  .popup-example { margin-top:0.5rem; padding-top:0.4rem; border-top:1px solid #444; font-size:0.85rem; color:#d8d8e0; }
+  .popup-example .lbl { color:#8fbf9f; font-weight:600; margin-right:0.3rem; }
+  mark.user-hl { background:#fff3a3; color:inherit; cursor:pointer; border-radius:2px; padding:0 1px; box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  mark.user-hl.has-note { background:#bfe3ff; border-bottom:2px dotted #3b82c4; }
+  mark.user-hl.flash-hl { animation:hlFlash 1.6s ease-out; }
+  @keyframes hlFlash { 0%,40% { box-shadow:0 0 0 4px #ffb020; } 100% { box-shadow:0 0 0 0 rgba(255,176,32,0); } }
+  body.dark-mode mark.user-hl { background:#6b5a15; color:#f5f0d8; }
+  body.dark-mode mark.user-hl.has-note { background:#1c4a66; color:#dff0ff; border-bottom-color:#5fb0e6; }
+  .sel-toolbar { position:fixed; z-index:260; display:flex; gap:0.4rem; background:#2d2d2d; padding:0.4rem; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,0.4); }
+  .sel-toolbar button { background:#444; color:#fff; border:none; border-radius:8px; padding:0.5rem 0.8rem; font-size:0.85rem; cursor:pointer; white-space:nowrap; }
+  .sel-toolbar button:hover, .sel-toolbar button:active { background:#5a5a5a; }
+  .note-editor-popup { position:fixed; z-index:260; background:#2d2d2d; color:#f0f0f0; border-radius:12px; padding:1rem 1.1rem; width:300px; max-width:calc(100vw - 2rem); box-shadow:0 12px 28px rgba(0,0,0,0.4); }
+  .note-editor-quote { font-size:0.85rem; font-style:italic; color:#ffcc80; margin-bottom:0.6rem; max-height:4.5em; overflow-y:auto; line-height:1.4; }
+  .note-editor-popup textarea { width:100%; min-height:80px; resize:vertical; border-radius:8px; border:1px solid #555; background:#1e1e1e; color:#f0f0f0; padding:0.5rem; font:inherit; font-size:0.9rem; }
+  .note-editor-actions { display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap; }
+  .note-editor-actions .btn { padding:0.45rem 0.8rem; font-size:0.82rem; }
+  .notes-panel-btn-count { font-size:0.72rem; background:var(--accent); color:#fff; border-radius:10px; padding:0.05rem 0.4rem; margin-left:0.3rem; }
+  .notes-panel-overlay { display:none; position:fixed; inset:0; background:rgba(20,20,20,0.65); z-index:999; justify-content:center; align-items:flex-start; padding:1rem; overflow-y:auto; }
+  .notes-panel-overlay.open { display:flex; }
+  .notes-panel-inner { background:#fff; border-radius:14px; max-width:720px; width:100%; margin:1.5rem auto; box-shadow:0 20px 50px rgba(0,0,0,0.4); overflow:hidden; }
+  body.dark-mode .notes-panel-inner { background:#2a2a3a; color:#e8e8ed; }
+  .notes-panel-toolbar { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; background:#1b3a4b; color:#fff; padding:0.9rem 1.2rem; position:sticky; top:0; }
+  .notes-panel-toolbar .np-title { font-weight:700; flex:1; }
+  .notes-panel-toolbar button { border:none; border-radius:20px; padding:0.45rem 1rem; font-size:0.85rem; cursor:pointer; }
+  .np-export-btn { background:#e6a817; color:#1b1b1b; font-weight:600; }
+  .np-close-btn { background:rgba(255,255,255,0.15); color:#fff; }
+  .notes-panel-backup-bar { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; background:#f4f0e6; border-bottom:1px solid #e6dfc8; padding:0.9rem 1.2rem; }
+  body.dark-mode .notes-panel-backup-bar { background:#33302a; border-bottom-color:#4a4638; }
+  .notes-panel-backup-bar .npb-text { flex:1; min-width:220px; display:flex; flex-direction:column; gap:0.15rem; }
+  .notes-panel-backup-bar .npb-text strong { font-size:0.9rem; color:#1b3a4b; }
+  body.dark-mode .notes-panel-backup-bar .npb-text strong { color:#9fd8ff; }
+  .notes-panel-backup-bar .npb-text span { font-size:0.78rem; color:#777; line-height:1.4; }
+  body.dark-mode .notes-panel-backup-bar .npb-text span { color:#aaa; }
+  .notes-panel-backup-bar .npb-actions { display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .npb-btn { background:#1b3a4b; color:#fff; border:none; border-radius:20px; padding:0.5rem 0.9rem; font-size:0.82rem; cursor:pointer; white-space:nowrap; font-weight:600; }
+  .npb-btn-outline { background:#fff; border:2px solid #1b3a4b; color:#1b3a4b; padding:0.42rem 0.9rem; }
+  body.dark-mode .npb-btn-outline { background:#2a2a3a; border-color:#5a5a7a; color:#e8e8ed; }
+  .notes-panel-list { padding:1rem 1.2rem 1.4rem; }
+  .notes-panel-empty { color:#888; text-align:center; padding:2rem 1rem; font-size:0.95rem; }
+  .notes-panel-group-title { font-weight:700; color:var(--primary); margin:1.1rem 0 0.5rem; font-size:0.95rem; }
+  body.dark-mode .notes-panel-group-title { color:#9fd8ff; }
+  .notes-panel-item { border:1px solid #e2e2e2; border-radius:10px; padding:0.7rem 0.9rem; margin-bottom:0.6rem; }
+  body.dark-mode .notes-panel-item { border-color:#444; }
+  .notes-panel-item .np-quote { font-style:italic; color:#555; font-size:0.9rem; border-left:3px solid #e6a817; padding-left:0.6rem; margin-bottom:0.4rem; }
+  body.dark-mode .notes-panel-item .np-quote { color:#c8c8d0; }
+  .notes-panel-item .np-note { font-size:0.92rem; margin-bottom:0.5rem; white-space:pre-wrap; }
+  .notes-panel-item .np-meta { font-size:0.78rem; color:#999; margin-bottom:0.5rem; }
+  .notes-panel-item .np-actions { display:flex; gap:0.5rem; }
+  .notes-panel-item .np-actions button { font-size:0.78rem; padding:0.3rem 0.7rem; border-radius:16px; border:1px solid #ccc; background:#f5f5f5; cursor:pointer; }
+  body.dark-mode .notes-panel-item .np-actions button { background:#3a3a4a; border-color:#555; color:#e8e8ed; }
+  .tts-highlight { background:#fff3cd; border-radius:4px; box-shadow:0 0 0 3px #fff3cd; transition:background 0.2s; }
+  body.dark-mode .tts-highlight { background:#4a4020; box-shadow:0 0 0 3px #4a4020; }
+  #readAloudBtn.reading { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .quiz-box { background:#fff; border-radius:16px; padding:1.6rem; margin-top:1.5rem; box-shadow:var(--shadow); transition:background 0.2s; }
+  .quiz-item-wrapper { margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px dashed #eee; }
+  .rationale-container { font-size:0.9rem; margin-top:0.4rem; padding:0.4rem 0.6rem; border-radius:6px; display:none; background:#f8f9fa; line-height:1.5; }
   .feedback { font-weight:600; margin-top:1rem; }
-  /* Audio bar */
   #sectionAudioBar { display:none; align-items:center; gap:0.7rem; background:#0b1c26; color:#fff; border-radius:12px; padding:0.7rem 1rem; margin:0.5rem 0; flex-wrap:wrap; }
-  #sectionAudioBar .audio-label { font-size:0.82rem; color:#aebfc7; }
-  #audioSectionLabel { font-size:0.82rem; color:#e6a817; font-weight:600; }
+  #sectionAudioBar .audio-label { font-size:0.82rem; color:#aebfc7; white-space:nowrap; }
+  #sectionAudioBar #audioSectionLabel { font-size:0.82rem; color:#e6a817; font-weight:600; }
   #sectionAudio { flex:1; min-width:200px; height:36px; }
-  /* Misc */
-  .page-break { border-top:2px dashed var(--tab-border); padding:1rem 0; text-align:center; color:var(--col-title-color); font-size:0.85rem; margin:1.5rem 0; }
-  footer { text-align:center; color:var(--footer-text); font-size:0.8rem; margin-top:2rem; padding:1.4rem 0 1rem; border-top:1px solid var(--footer-border); }
-  .wt-logo { font-family:"Segoe UI","Noto Sans SC",sans-serif; font-weight:700; font-size:1.2rem; color:#1b3a4b; letter-spacing:0.5px; margin-bottom:0.3rem; }
-  body.night .wt-logo { color:#e6a817; }
+  .audio-lang-toggle { display:inline-flex; border:1px solid #4a5a6a; border-radius:8px; overflow:hidden; }
+  .audio-lang-btn { background:#1e2f3a; color:#aebfc7; border:none; padding:0.32rem 0.85rem; font-size:0.8rem; font-weight:600; cursor:pointer; transition:background 0.15s, color 0.15s; }
+  .audio-lang-btn.active { background:#e6a817; color:#0b1c26; }
+  .audio-lang-btn:hover:not(.active) { background:#2c3f4d; }
+  footer { text-align:center; color:#777; font-size:0.8rem; margin-top:2rem; padding:1.4rem 0 1rem; border-top:1px solid #eee; transition:border-color 0.2s; }
+  .wt-logo { font-family:"Segoe UI","Noto Sans SC","Microsoft YaHei",sans-serif; font-weight:700; font-size:1.2rem; color:#1b3a4b; letter-spacing:0.5px; margin-bottom:0.3rem; transition:color 0.2s; }
   .wt-logo .wt-i { position:relative; display:inline-block; }
   .wt-logo .wt-i::after { content:''; position:absolute; top:-7px; left:3px; width:6px; height:6px; border-radius:50%; background:#e6a817; }
-  .wt-underline { width:90px; height:3px; background:#e6a817; margin:0.3rem auto 0.5rem; }
-  .wt-credit { font-size:0.8rem; color:var(--footer-text); }
+  .wt-underline { width:90px; height:3px; background:#e6a817; border-radius:0; margin:0.3rem auto 0.5rem; }
+  .wt-credit { font-size:0.8rem; color:#777; }
   #error-message { background:#ffe0e0; border:1px solid red; padding:1rem; border-radius:8px; display:none; color:red; margin:1rem 0; }
-  #readingModeSelect { padding:0.3rem 0.7rem; border-radius:20px; border:1px solid var(--tab-border); font-size:0.85rem; background:var(--card-bg); color:var(--text); }
+  #readingModeSelect { padding:0.3rem 0.7rem; border-radius:20px; border:1px solid #ccc; font-size:0.85rem; }
   .paragraph-image { margin:1rem 0; }
   .paragraph-image img { max-width:100%; border-radius:6px; }
-  .page-nav-btn { background:var(--tab-bg); border:1px solid var(--tab-border); border-radius:6px; padding:0.5rem 1rem; cursor:pointer; font-size:0.9rem; min-height:44px; color:var(--text); }
+  .paragraph-image-multi { display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:center; }
+  .paragraph-image-multi img { max-width:calc(50% - 0.3rem); width:auto; }
+  .page-nav-btn { background:#f5f5f5; border:1px solid #ddd; border-radius:6px; padding:0.5rem 1rem; cursor:pointer; font-size:0.9rem; min-height:44px; transition:background 0.2s, border-color 0.2s; }
   .page-nav-btn:disabled { opacity:0.4; cursor:default; }
-  .page-nav-label { font-size:0.9rem; color:var(--col-title-color); margin:0 0.6rem; }
-  select { color:var(--text); background:var(--card-bg); }
+  .page-nav-label { font-size:0.9rem; color:#777; margin:0 0.6rem; }
+  .section-bottom-nav { display:flex; justify-content:space-between; align-items:center; gap:0.6rem; margin-top:1.4rem; padding-top:1rem; border-top:1px solid #eee; }
+  .section-bottom-nav .page-nav-btn { flex:1; max-width:180px; font-weight:600; }
+  .section-bottom-nav .page-nav-label { flex-shrink:0; text-align:center; }
+  @media (max-width:640px) {
+    .section-bottom-nav .page-nav-btn { max-width:none; font-size:0.85rem; padding:0.6rem 0.5rem; }
+    .section-bottom-nav .page-nav-label { font-size:0.8rem; }
+  }
+  .font-size-control { display:flex; align-items:center; gap:0.4rem; background:#f5f5f5; border-radius:30px; padding:0.25rem 0.4rem; }
+  .font-size-btn { background:#fff; border:1px solid #ccc; color:#1b3a4b; width:34px; height:34px; min-height:34px; border-radius:50%; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; }
+  .font-size-btn:active { background:#e8e8e8; }
+  #fontScaleLabel { font-size:0.8rem; color:#555; min-width:2.6em; text-align:center; }
+  @media (max-width:640px) {
+    .font-size-control { order:99; width:100%; justify-content:center; margin-top:0.3rem; }
+  }
 </style>
 </head>
 <body>
-<div class="top-bar">
-  <span class="title">📖 The Great Gatsby – Bilingual Edition</span>
-  <select id="chapterSelect"></select>
-</div>
-<div id="bookProgressBar"><div id="bookProgressFill"></div></div>
-<div id="bookProgressLabel"></div>
+<div class="top-bar"><span class="title">📖 The Great Gatsby – Bilingual Edition</span><select id="chapterSelect"></select></div>
 <div class="container">
   <div id="error-message"></div>
-  <div id="bookDescription"></div>
   <div class="toolbar">
-    <button class="btn btn-outline" id="simplifyToggle">📖 Simplified</button>
-    <span class="simple-indicator" id="simpActiveLabel">(Simplified)</span>
-    <div class="font-controls">
-      <button class="font-btn" id="fontDecBtn" title="Smaller text">A−</button>
-      <button class="font-btn" id="fontIncBtn" title="Larger text">A+</button>
+    <button class="btn btn-outline" id="simplifyToggle">📖 Switch to Simplified</button>
+    <span class="simple-indicator" id="simpActiveLabel">(Simplified Active)</span>
+    <div class="font-size-control" title="Adjust text size">
+      <button class="font-size-btn" id="fontDecBtn" aria-label="Decrease text size">A−</button>
+      <span id="fontScaleLabel">100%</span>
+      <button class="font-size-btn" id="fontIncBtn" aria-label="Increase text size">A+</button>
     </div>
-    <button class="btn btn-outline night-btn" id="nightToggle">🌙</button>
-    <button class="btn btn-outline" id="bookmarkBtn" title="Save bookmark here">🔖</button>
-    <span style="margin-left:auto; font-size:0.8rem; color:var(--col-title-color);">💡 Tap highlighted words</span>
-    <label style="font-weight:400; font-size:0.88rem;">Mode:
+    <button class="btn btn-outline" id="darkModeToggle" title="Toggle dark mode">🌙 Dark Mode</button>
+    <button class="btn btn-outline" id="readAloudBtn" title="Read the English text aloud">🔊 Read Aloud</button>
+    <button class="btn btn-outline" id="notesPanelBtn" title="View all your highlights and notes">📒 My Notes<span class="notes-panel-btn-count" id="notesPanelBtnCount" style="display:none;"></span></button>
+    <span style="margin-left:auto; font-size:0.82rem; color:#555;">💡 Tap highlighted words · Select text to highlight or add a note</span>
+    <label style="font-weight:400; margin-left:0.4rem; font-size:0.9rem;">Mode:
       <select id="readingModeSelect">
         <option value="sections">📑 Sections</option>
-        <option value="full">📖 Full</option>
+        <option value="full">📖 Full Chapter</option>
         <option value="pages">📄 Pages</option>
       </select>
     </label>
   </div>
-  <div class="bookmark-bar" id="bookmarkBar" style="display:none;">
-    🔖 <span id="bookmarkLabel"></span>
-    <button style="font-size:0.8rem;padding:0.2rem 0.6rem;border-radius:10px;border:1px solid #ccc;cursor:pointer;background:transparent;color:inherit;" id="goBookmarkBtn">Go to bookmark</button>
-    <button style="font-size:0.8rem;padding:0.2rem 0.5rem;border-radius:10px;border:1px solid #ccc;cursor:pointer;background:transparent;color:inherit;" id="clearBookmarkBtn">✕</button>
-  </div>
   <div id="sectionAudioBar">
     <span class="audio-label">🎵</span>
     <span id="audioSectionLabel"></span>
+    <select id="audioSectionSelect" style="display:none; padding:0.3rem 0.5rem; border-radius:6px; border:none; font-size:0.82rem; max-width:200px;" aria-label="Choose section audio"></select>
+    <span id="audioLangToggle" class="audio-lang-toggle" style="display:none;">
+      <button type="button" data-lang="en" class="audio-lang-btn active">EN</button>
+      <button type="button" data-lang="zh" class="audio-lang-btn">中文</button>
+    </span>
     <audio id="sectionAudio" controls></audio>
   </div>
-  <div id="tsPanel" style="display:none;"></div>
+
   <div id="sectionTabs"></div>
   <div id="sectionProgress"></div>
+
   <div class="lang-toggle-bar" id="langToggleBar">
     <button class="lang-toggle-btn active" id="toggleEnBtn">🇬🇧 English</button>
     <button class="lang-toggle-btn" id="toggleZhBtn">🇨🇳 中文</button>
   </div>
+
   <div class="cols" id="colsContainer">
-    <div class="col mobile-visible" id="enCol"><div class="col-title">🇬🇧 English</div><div id="enContent"></div></div>
-    <div class="col" id="zhCol"><div class="col-title">🇨🇳 Chinese</div><div id="zhContent"></div></div>
+    <div class="col mobile-visible" id="enCol"><div class="col-title">🇬🇧 English Version</div><div id="enContent"></div></div>
+    <div class="col" id="zhCol"><div class="col-title">🇨🇳 Chinese Translation</div><div id="zhContent"></div></div>
   </div>
-  <div class="mark-read-bar" id="markReadBar" style="display:none;">
-    <button id="markReadBtn">✓ Mark as Read</button>
-    <span class="read-label" id="markReadLabel"></span>
+
+  <div id="vocabPopup" class="vocab-popup"><button class="popup-close" id="closePopup">✕</button><div class="zh-row"><div class="zh" id="popupZh"></div><button class="popup-speak" id="popupSpeak" title="Listen to pronunciation">🔊</button></div><div class="ipa" id="popupIpa" style="display:none;"></div><div id="popupExplain"></div><div id="popupSimple" style="margin-top:0.4rem; font-style:italic;"></div><div id="popupExample" class="popup-example" style="display:none;"></div></div>
+
+  <div id="selToolbar" class="sel-toolbar" style="display:none;">
+    <button id="selHighlightBtn" type="button">🖍 Highlight</button>
+    <button id="selNoteBtn" type="button">📝 Note</button>
   </div>
-  <div id="vocabPopup" class="vocab-popup"><button class="popup-close" id="closePopup">✕</button><div class="zh" id="popupZh"></div><div id="popupExplain"></div><div id="popupSimple" style="margin-top:0.4rem;font-style:italic;"></div></div>
-  <div class="quiz-box"><h3>❓ Comprehension Check</h3><div id="tfQuestions"></div><button class="btn" id="checkTfBtn">✅ Check Answers</button><div id="tfFeedback" class="feedback"></div></div>
-  <div id="progressBox" style="margin-top:1rem;font-size:0.88rem;color:var(--col-title-color);"></div>
+
+  <div id="noteEditorPopup" class="note-editor-popup" style="display:none;">
+    <div class="note-editor-quote" id="noteEditorQuote"></div>
+    <textarea id="noteEditorText" placeholder="Write a note about this passage..." maxlength="2000"></textarea>
+    <div class="note-editor-actions">
+      <button id="noteSaveBtn" type="button" class="btn">💾 Save</button>
+      <button id="noteDeleteBtn" type="button" class="btn btn-outline" style="display:none;">🗑 Remove Highlight</button>
+      <button id="noteCancelBtn" type="button" class="btn btn-outline">✕ Close</button>
+    </div>
+  </div>
+
+  <div class="quiz-box"><h3>❓ Comprehension Verification</h3><div id="tfQuestions"></div><button class="btn" id="checkTfBtn">✅ Check Answers</button><div id="tfFeedback" class="feedback"></div></div>
+
+  <div id="sectionBottomNav" class="section-bottom-nav" style="display:none;"></div>
+
+  <div id="notesPanelOverlay" class="notes-panel-overlay">
+    <div class="notes-panel-inner">
+      <div class="notes-panel-toolbar">
+        <span class="np-title">📒 My Highlights &amp; Notes</span>
+        <button class="np-export-btn" id="notesExportBtn">📄 Export as Text</button>
+        <button class="np-close-btn" id="notesPanelCloseBtn">✕ Close</button>
+      </div>
+      <div class="notes-panel-backup-bar">
+        <div class="npb-text">
+          <strong>💾 Full Backup</strong>
+          <span>Everything this reader has saved on this device — reading progress, dark mode, text size, and all highlights &amp; notes. Use this to move to another device or browser, or to protect against losing it if this browser's storage ever gets cleared.</span>
+        </div>
+        <div class="npb-actions">
+          <button class="npb-btn" id="dataExportBtn">⬇️ Export All Data</button>
+          <button class="npb-btn npb-btn-outline" id="dataImportBtn">⬆️ Import All Data</button>
+          <input type="file" id="dataImportInput" accept="application/json,.json" style="display:none;">
+        </div>
+      </div>
+      <div class="notes-panel-list" id="notesPanelList"></div>
+    </div>
+  </div>
+
+  <div id="progressBox" style="margin-top:1rem; font-size:0.9rem; color:#555;"></div>
 </div>
 <footer>
   <div class="wt-logo">Words That Th<span class="wt-i">i</span>nk</div>
   <div class="wt-underline"></div>
-  <div class="wt-credit">Created by Words That Think (dwang055@gmail.com) · © 2026 · For Educational Purposes Only</div>
+  <div class="wt-credit">Created by Words That Think · © 2026 · For Educational Purposes Only</div>
 </footer>
 
 <script id="bookDataScript" type="application/json">{
   "title": "The Great Gatsby",
   "author": "F. Scott Fitzgerald",
-  "chapterLabel": "Ch.",
-  "description": "",
+  "bookId": "the-great-gatsby-f-scott-fitzgerald",
   "chapters": [
     {
       "id": 1,
@@ -245,7 +328,9 @@
               "text": "Gatsby represented everything Nick had an unaffected scorn for.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch01-s1.mp3",
+          "audioZh": "audio/ch01-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -293,7 +378,9 @@
               "text": "The man asking for directions made Nick feel like a pathfinder.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch01-s2.mp3",
+          "audioZh": "audio/ch01-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -341,7 +428,9 @@
               "text": "Daisy and Tom moved east for a specific career opportunity.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch01-s3.mp3",
+          "audioZh": "audio/ch01-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -401,7 +490,9 @@
               "text": "Daisy claimed she was paralyzed with happiness to see Nick.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch01-s4.mp3",
+          "audioZh": "audio/ch01-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -449,7 +540,9 @@
               "text": "Daisy knew immediately who Gatsby was.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch01-s5.mp3",
+          "audioZh": "audio/ch01-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -503,7 +596,9 @@
               "text": "Tom left the table because he was upset by the dinner conversation.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch01-s6.mp3",
+          "audioZh": "audio/ch01-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -563,7 +658,9 @@
               "text": "Daisy said she had been happy and content with her life.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch01-s7.mp3",
+          "audioZh": "audio/ch01-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -617,7 +714,9 @@
               "text": "Gatsby stretched out his arms toward a green light across the water.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch01-s8.mp3",
+          "audioZh": "audio/ch01-s8-zh.mp3"
         }
       ]
     },
@@ -667,7 +766,9 @@
               "text": "Nick first met Tom’s mistress because of a train stop near the valley of ashes.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch02-s1.mp3",
+          "audioZh": "audio/ch02-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -705,7 +806,9 @@
               "text": "The building they entered was a large shopping mall.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch02-s2.mp3",
+          "audioZh": "audio/ch02-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -743,7 +846,9 @@
               "text": "Myrtle treated her husband with great respect.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch02-s3.mp3",
+          "audioZh": "audio/ch02-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -793,7 +898,9 @@
               "text": "The old man selling dogs looked like Abraham Lincoln.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch02-s4.mp3",
+          "audioZh": "audio/ch02-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -849,7 +956,9 @@
               "text": "Tom produced whiskey from a locked cabinet.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch02-s5.mp3",
+          "audioZh": "audio/ch02-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -939,7 +1048,9 @@
               "text": "Nick took a cab home immediately after the violence.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch02-s6.mp3",
+          "audioZh": "audio/ch02-s6-zh.mp3"
         }
       ]
     },
@@ -981,7 +1092,9 @@
               "text": "The bar at Gatsby's house had a fake plastic rail.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s1.mp3",
+          "audioZh": "audio/ch03-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -1017,7 +1130,9 @@
               "text": "The party atmosphere grew more lively as the evening progressed.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch03-s2.mp3",
+          "audioZh": "audio/ch03-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -1059,7 +1174,9 @@
               "text": "Jordan Baker greeted Nick very warmly when she saw him.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s3.mp3",
+          "audioZh": "audio/ch03-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -1101,7 +1218,9 @@
               "text": "Jordan's escort was a polite and reserved young man.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s4.mp3",
+          "audioZh": "audio/ch03-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -1143,7 +1262,9 @@
               "text": "The girls in yellow turned out to be professional stage twins.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s5.mp3",
+          "audioZh": "audio/ch03-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -1185,7 +1306,9 @@
               "text": "Jordan Baker fully believed Gatsby's claim about Oxford.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s6.mp3",
+          "audioZh": "audio/ch03-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -1227,7 +1350,9 @@
               "text": "The red-haired singer performed flawlessly without any emotion.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s7.mp3",
+          "audioZh": "audio/ch03-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -1269,7 +1394,9 @@
               "text": "Gatsby reminded Nick about their seaplane trip the next morning.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch03-s8.mp3",
+          "audioZh": "audio/ch03-s8-zh.mp3"
         },
         {
           "sectionId": 9,
@@ -1311,7 +1438,9 @@
               "text": "The second man from the wreck immediately understood the wheel was missing.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s9.mp3",
+          "audioZh": "audio/ch03-s9-zh.mp3"
         },
         {
           "sectionId": 10,
@@ -1365,7 +1494,9 @@
               "text": "Jordan once moved her golf ball from a bad lie during a tournament.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch03-s10.mp3",
+          "audioZh": "audio/ch03-s10-zh.mp3"
         },
         {
           "sectionId": 11,
@@ -1401,7 +1532,9 @@
               "text": "Nick was completely free of romantic entanglements when he met Jordan.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch03-s11.mp3",
+          "audioZh": "audio/ch03-s11-zh.mp3"
         }
       ]
     },
@@ -1495,7 +1628,9 @@
               "text": "All of Benny McClenahan's four girls were completely different from each other.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch04-s1.mp3",
+          "audioZh": "audio/ch04-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -1559,7 +1694,9 @@
               "text": "The car's interior felt like a green leather conservatory.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch04-s2.mp3",
+          "audioZh": "audio/ch04-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -1737,7 +1874,9 @@
               "text": "The photograph showed Gatsby at Cambridge.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch04-s3.mp3",
+          "audioZh": "audio/ch04-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -1843,7 +1982,9 @@
               "text": "Gatsby said he had done a favor for the police commissioner.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch04-s4.mp3",
+          "audioZh": "audio/ch04-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -2051,7 +2192,9 @@
               "text": "Wolfshiem ate his meal with slow, sad nostalgia.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch04-s5.mp3",
+          "audioZh": "audio/ch04-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -2337,7 +2480,9 @@
               "text": "Gatsby stayed to chat with Tom after being introduced.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch04-s6.mp3",
+          "audioZh": "audio/ch04-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -2461,7 +2606,9 @@
               "text": "Daisy's reputation was damaged by her wild behavior in Chicago.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch04-s7.mp3",
+          "audioZh": "audio/ch04-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -2633,7 +2780,9 @@
               "text": "Nick's thoughts shifted to Jordan as they rode through the park.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch04-s8.mp3",
+          "audioZh": "audio/ch04-s8-zh.mp3"
         }
       ]
     },
@@ -2829,7 +2978,9 @@
               "text": "Gatsby wanted Nick's grass cut before Daisy arrived.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch05-s1.mp3",
+          "audioZh": "audio/ch05-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -3019,7 +3170,9 @@
               "text": "Daisy arrived precisely at four o'clock.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch05-s2.mp3",
+          "audioZh": "audio/ch05-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -3233,7 +3386,9 @@
               "text": "Nick left Gatsby and Daisy alone by going outside into the rain.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch05-s3.mp3",
+          "audioZh": "audio/ch05-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -3459,7 +3614,9 @@
               "text": "Daisy cried because she was unhappy with the tea.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch05-s4.mp3",
+          "audioZh": "audio/ch05-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -3697,7 +3854,9 @@
               "text": "Nick left Gatsby and Daisy together in the music room.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch05-s5.mp3",
+          "audioZh": "audio/ch05-s5-zh.mp3"
         }
       ]
     },
@@ -3761,7 +3920,9 @@
               "text": "Gatsby was already front-page news all summer.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch06-s1.mp3",
+          "audioZh": "audio/ch06-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -3819,7 +3980,9 @@
               "text": "Gatsby dropped out of St. Olaf College because he loved the work-study program.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch06-s2.mp3",
+          "audioZh": "audio/ch06-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -3877,7 +4040,9 @@
               "text": "Ella Kaye prevented Gatsby from getting his inheritance.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch06-s3.mp3",
+          "audioZh": "audio/ch06-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -4163,7 +4328,9 @@
               "text": "Tom was pleased that Gatsby knew his wife.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch06-s4.mp3",
+          "audioZh": "audio/ch06-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -4317,7 +4484,9 @@
               "text": "Gatsby and Daisy danced and then spent time alone at Nick's house.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch06-s5.mp3",
+          "audioZh": "audio/ch06-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -4447,7 +4616,9 @@
               "text": "Daisy admired the raw vitality of West Egg.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch06-s6.mp3",
+          "audioZh": "audio/ch06-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -4589,7 +4760,9 @@
               "text": "Daisy felt that Gatsby's party offered romantic possibilities her world lacked.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch06-s7.mp3",
+          "audioZh": "audio/ch06-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -4731,7 +4904,9 @@
               "text": "Gatsby kissed Daisy for the first time five years earlier on an autumn night.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch06-s8.mp3",
+          "audioZh": "audio/ch06-s8-zh.mp3"
         }
       ]
     },
@@ -4779,7 +4954,9 @@
               "text": "Daisy called Nick to cancel the lunch invitation.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s1.mp3",
+          "audioZh": "audio/ch07-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -4821,7 +4998,9 @@
               "text": "Nick's commutation ticket came back clean from the conductor.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s2.mp3",
+          "audioZh": "audio/ch07-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -4863,7 +5042,9 @@
               "text": "Gatsby had always believed firmly in Pammy's existence.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s3.mp3",
+          "audioZh": "audio/ch07-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -4905,7 +5086,9 @@
               "text": "Gatsby's house was directly across the bay from Tom's.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s4.mp3",
+          "audioZh": "audio/ch07-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -4953,7 +5136,9 @@
               "text": "Tom was completely calm and controlled during the drive.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s5.mp3",
+          "audioZh": "audio/ch07-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -5007,7 +5192,9 @@
               "text": "Wilson had discovered Myrtle was unfaithful.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s6.mp3",
+          "audioZh": "audio/ch07-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -5055,7 +5242,9 @@
               "text": "Daisy suggested they hire five bathrooms and take cold baths.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s7.mp3",
+          "audioZh": "audio/ch07-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -5103,7 +5292,9 @@
               "text": "Gatsby claimed he had never been to Oxford.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s8.mp3",
+          "audioZh": "audio/ch07-s8-zh.mp3"
         },
         {
           "sectionId": 9,
@@ -5151,7 +5342,9 @@
               "text": "Jordan and Nick were forced to stay and witness the confrontation.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s9.mp3",
+          "audioZh": "audio/ch07-s9-zh.mp3"
         },
         {
           "sectionId": 10,
@@ -5193,7 +5386,9 @@
               "text": "Tom reminded Daisy of carrying her from the Punch Bowl.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s10.mp3",
+          "audioZh": "audio/ch07-s10-zh.mp3"
         },
         {
           "sectionId": 11,
@@ -5241,7 +5436,9 @@
               "text": "Tom insisted Daisy and Gatsby drive home together.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s11.mp3",
+          "audioZh": "audio/ch07-s11-zh.mp3"
         },
         {
           "sectionId": 12,
@@ -5277,7 +5474,9 @@
               "text": "Jordan was described as someone who carried dreams from age to age.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s12.mp3",
+          "audioZh": "audio/ch07-s12-zh.mp3"
         },
         {
           "sectionId": 13,
@@ -5319,7 +5518,9 @@
               "text": "Myrtle's left breast was described as swinging loose like a flap.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s13.mp3",
+          "audioZh": "audio/ch07-s13-zh.mp3"
         },
         {
           "sectionId": 14,
@@ -5367,7 +5568,9 @@
               "text": "Wilson had no idea what kind of car killed Myrtle.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch07-s14.mp3",
+          "audioZh": "audio/ch07-s14-zh.mp3"
         },
         {
           "sectionId": 15,
@@ -5421,7 +5624,9 @@
               "text": "Gatsby was waiting outside the Buchanans' house in the dark.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s15.mp3",
+          "audioZh": "audio/ch07-s15-zh.mp3"
         },
         {
           "sectionId": 16,
@@ -5463,7 +5668,9 @@
               "text": "Tom and Daisy appeared to be conspiring together at the kitchen table.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s16.mp3",
+          "audioZh": "audio/ch07-s16-zh.mp3"
         },
         {
           "sectionId": 17,
@@ -5493,7 +5700,9 @@
               "text": "Nick described Gatsby as 'watching over nothing' in the moonlight.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch07-s17.mp3",
+          "audioZh": "audio/ch07-s17-zh.mp3"
         }
       ]
     },
@@ -5547,7 +5756,9 @@
               "text": "They found plenty of fresh cigarettes in the humidor.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch08-s1.mp3",
+          "audioZh": "audio/ch08-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -5629,7 +5840,9 @@
               "text": "Gatsby was the one who felt betrayed when they met again two days later.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch08-s2.mp3",
+          "audioZh": "audio/ch08-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -5677,7 +5890,9 @@
               "text": "Tom Buchanan appeared in mid-spring and Daisy felt flattered.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch08-s3.mp3",
+          "audioZh": "audio/ch08-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -5737,7 +5952,9 @@
               "text": "Gatsby felt he had permanently lost the best part of his memories.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch08-s4.mp3",
+          "audioZh": "audio/ch08-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -5797,7 +6014,9 @@
               "text": "Gatsby reacted angrily to Nick's compliment.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch08-s5.mp3",
+          "audioZh": "audio/ch08-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -5845,7 +6064,9 @@
               "text": "Gatsby's phone line was kept open for a call from Detroit.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch08-s6.mp3",
+          "audioZh": "audio/ch08-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -6005,7 +6226,9 @@
               "text": "Wilson died at the poolside before Gatsby was found.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch08-s7.mp3",
+          "audioZh": "audio/ch08-s7-zh.mp3"
         }
       ]
     },
@@ -6053,7 +6276,9 @@
               "text": "Nick felt responsible for Gatsby because no one else cared deeply.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s1.mp3",
+          "audioZh": "audio/ch09-s1-zh.mp3"
         },
         {
           "sectionId": 2,
@@ -6107,7 +6332,9 @@
               "text": "Nick found information about Gatsby's family in his desk.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch09-s2.mp3",
+          "audioZh": "audio/ch09-s2-zh.mp3"
         },
         {
           "sectionId": 3,
@@ -6149,7 +6376,9 @@
               "text": "Slagle was unaware of Gatsby's death until Nick told him.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s3.mp3",
+          "audioZh": "audio/ch09-s3-zh.mp3"
         },
         {
           "sectionId": 4,
@@ -6227,7 +6456,9 @@
               "text": "Mr. Gatz wanted to take his son's body back to the West.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch09-s4.mp3",
+          "audioZh": "audio/ch09-s4-zh.mp3"
         },
         {
           "sectionId": 5,
@@ -6299,7 +6530,9 @@
               "text": "Klipspringer attended the funeral.",
               "answer": false
             }
-          ]
+          ],
+          "audio": "audio/ch09-s5.mp3",
+          "audioZh": "audio/ch09-s5-zh.mp3"
         },
         {
           "sectionId": 6,
@@ -6341,7 +6574,9 @@
               "text": "The owl-eyed man expressed pity for Gatsby at the cemetery.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s6.mp3",
+          "audioZh": "audio/ch09-s6-zh.mp3"
         },
         {
           "sectionId": 7,
@@ -6395,7 +6630,9 @@
               "text": "Gatsby's death made Nick feel the East was haunted and distorted.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s7.mp3",
+          "audioZh": "audio/ch09-s7-zh.mp3"
         },
         {
           "sectionId": 8,
@@ -6455,7 +6692,9 @@
               "text": "Nick felt that Tom and Daisy were careless people who left messes for others.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s8.mp3",
+          "audioZh": "audio/ch09-s8-zh.mp3"
         },
         {
           "sectionId": 9,
@@ -6515,14 +6754,15 @@
               "text": "The final sentence compares humanity to boats struggling against the current.",
               "answer": true
             }
-          ]
+          ],
+          "audio": "audio/ch09-s9.mp3",
+          "audioZh": "audio/ch09-s9-zh.mp3"
         }
       ]
     }
   ]
 }</script>
-<script>
-  const vocabDefinitions = {
+<script id="vocabDataScript" type="application/json">{
   "vulnerable": {
     "zh": "易受伤害的；脆弱的",
     "explain": "Easily hurt physically or emotionally.",
@@ -13325,7 +13565,9 @@
     "explain": "The quality of being holy.",
     "simple": "holiness"
   }
-};
+}</script>
+<script>
+  let vocabDefinitions = {};
   (function() {
     const errorBox = document.getElementById("error-message");
     function showError(msg) {
@@ -13345,6 +13587,14 @@
       showError("Chapters data missing.");
       return;
     }
+    const vocabEl = document.getElementById("vocabDataScript");
+    if (vocabEl) {
+      try {
+        vocabDefinitions = JSON.parse(vocabEl.textContent) || {};
+      } catch (e) {
+        showError("Vocabulary JSON parse error: " + e.message);
+      }
+    }
 
     let currentChapterIndex = null;
     let currentChapter = null;
@@ -13354,103 +13604,64 @@
     let readingMode = 'sections';
     let currentVocabTrigger = null;
     let mobileLang = 'en';
-    const LABEL = bookData.chapterLabel || 'Ch.';
-    const READING_MODE_KEY = bookData.title + "_readingMode";
-    const PROGRESS_KEY = bookData.title + "_progress";
-    const READ_KEY = bookData.title + "_read";
-    const NIGHT_KEY = bookData.title + "_night";
-    const FONT_KEY = bookData.title + "_font";
-    const BOOKMARK_KEY = bookData.title + "_bookmark";
+    let darkMode = false;
+    const FONT_SCALE_KEY = "wtb_fontScale";
+    const FONT_SCALE_MIN = 0.8;
+    const FONT_SCALE_MAX = 1.8;
+    const FONT_SCALE_STEP = 0.1;
+    let fontScale = 1;
+    // Old builds keyed storage on the chapter count, so adding a chapter wiped
+    // everyone's progress and notes. New builds use a stable bookId instead.
+    const LEGACY_BOOK_KEY = bookData.title + "::" + (bookData.author || "") + "::" + (bookData.chapters ? bookData.chapters.length : 0);
+    const BOOK_KEY = bookData.bookId ? ("wtb::" + bookData.bookId) : LEGACY_BOOK_KEY;
+    const READING_MODE_KEY = BOOK_KEY + "_readingMode";
+    const PROGRESS_KEY = BOOK_KEY + "_progress";
+    const ANNOTATIONS_KEY = BOOK_KEY + "_annotations";
+    // One-time carry-over of data saved under the legacy key (when the chapter count hasn't changed since).
+    if (BOOK_KEY !== LEGACY_BOOK_KEY) {
+      try {
+        ["_readingMode", "_progress", "_annotations"].forEach(function(suffix) {
+          if (localStorage.getItem(BOOK_KEY + suffix) === null) {
+            var old = localStorage.getItem(LEGACY_BOOK_KEY + suffix);
+            if (old !== null) localStorage.setItem(BOOK_KEY + suffix, old);
+          }
+        });
+      } catch (e) {}
+    }
     const PAGE_SIZE = 6;
     const placeholderQuiz = [{ text: "This section has no quiz yet.", answer: true, rationale: "" }];
-    let readSections = JSON.parse(localStorage.getItem(READ_KEY) || '{}');
-    let fontSizes = [0.85, 0.95, 1.05, 1.18, 1.32, 1.5];
-    let fontIdx = parseInt(localStorage.getItem(FONT_KEY) || '2');
-    function applyFontSize() { document.documentElement.style.setProperty('--font-size', fontSizes[fontIdx] + 'rem'); }
-    applyFontSize();
 
-    // Night mode
-    let nightMode = localStorage.getItem(NIGHT_KEY) === '1';
-    function applyNight() { document.body.classList.toggle('night', nightMode); document.getElementById('nightToggle').textContent = nightMode ? '☀️' : '🌙'; }
-    applyNight();
-    document.getElementById('nightToggle').addEventListener('click', () => { nightMode = !nightMode; localStorage.setItem(NIGHT_KEY, nightMode ? '1' : '0'); applyNight(); });
-
-    // Font size
-    document.getElementById('fontIncBtn').addEventListener('click', () => { if (fontIdx < fontSizes.length-1) { fontIdx++; localStorage.setItem(FONT_KEY, fontIdx); applyFontSize(); } });
-    document.getElementById('fontDecBtn').addEventListener('click', () => { if (fontIdx > 0) { fontIdx--; localStorage.setItem(FONT_KEY, fontIdx); applyFontSize(); } });
-
-    // Book description
-    if (bookData.description) {
-      const descEl = document.getElementById('bookDescription');
-      descEl.textContent = bookData.description;
-      descEl.style.display = 'block';
+    let annotations = {};
+    function loadAnnotations() {
+      try {
+        const raw = localStorage.getItem(ANNOTATIONS_KEY);
+        annotations = raw ? (JSON.parse(raw) || {}) : {};
+      } catch (e) { annotations = {}; }
     }
-
-    // Progress bar
-    function updateProgressBar() {
-      const total = bookData.chapters.length;
-      const pct = total > 1 ? Math.round((currentChapterIndex / (total - 1)) * 100) : 100;
-      document.getElementById('bookProgressFill').style.width = pct + '%';
-      document.getElementById('bookProgressLabel').textContent = LABEL + ' ' + (currentChapterIndex + 1) + ' of ' + total;
+    function saveAnnotationsStore() {
+      try { localStorage.setItem(ANNOTATIONS_KEY, JSON.stringify(annotations)); } catch (e) {}
     }
-
-    // Mark as read
-    function sectionReadKey(chIdx, secIdx) { return chIdx + '_' + secIdx; }
-    function updateMarkReadUI() {
-      const bar = document.getElementById('markReadBar');
-      const btn = document.getElementById('markReadBtn');
-      const lbl = document.getElementById('markReadLabel');
-      if (readingMode !== 'sections' || !currentChapter || !currentChapter.sections) { bar.style.display = 'none'; return; }
-      bar.style.display = 'flex';
-      const key = sectionReadKey(currentChapterIndex, currentSection);
-      const isRead = !!readSections[key];
-      btn.textContent = isRead ? '✓ Read' : '✓ Mark as Read';
-      btn.className = isRead ? 'unmark' : '';
-      lbl.textContent = isRead ? 'This section is marked as read.' : '';
-      refreshTabReadState();
+    function allAnnotations() {
+      const out = [];
+      for (const key in annotations) {
+        (annotations[key] || []).forEach(a => out.push(a));
+      }
+      return out;
     }
-    function refreshTabReadState() {
-      document.querySelectorAll('.section-tab').forEach((tab, idx) => {
-        const key = sectionReadKey(currentChapterIndex, idx);
-        tab.classList.toggle('read', !!readSections[key]);
-      });
+    function findAnnotationById(id) {
+      for (const key in annotations) {
+        const list = annotations[key] || [];
+        for (let i = 0; i < list.length; i++) {
+          if (list[i].id === id) return { key, index: i, ann: list[i] };
+        }
+      }
+      return null;
     }
-    document.getElementById('markReadBtn').addEventListener('click', () => {
-      const key = sectionReadKey(currentChapterIndex, currentSection);
-      if (readSections[key]) delete readSections[key];
-      else readSections[key] = 1;
-      localStorage.setItem(READ_KEY, JSON.stringify(readSections));
-      updateMarkReadUI();
-    });
-
-    // Bookmark
-    let bookmark = JSON.parse(localStorage.getItem(BOOKMARK_KEY) || 'null');
-    function updateBookmarkUI() {
-      const bar = document.getElementById('bookmarkBar');
-      const lbl = document.getElementById('bookmarkLabel');
-      if (!bookmark) { bar.style.display = 'none'; return; }
-      bar.style.display = 'flex';
-      const ch = bookData.chapters[bookmark.chapterIndex];
-      let label = LABEL + ' ' + (bookmark.chapterIndex + 1);
-      if (ch && ch.sections && bookmark.sectionIndex != null) label += ' · ' + (ch.sections[bookmark.sectionIndex] ? ch.sections[bookmark.sectionIndex].heading : '');
-      lbl.textContent = label;
-    }
-    document.getElementById('bookmarkBtn').addEventListener('click', () => {
-      bookmark = { chapterIndex: currentChapterIndex, sectionIndex: currentSection };
-      localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmark));
-      updateBookmarkUI();
-    });
-    document.getElementById('goBookmarkBtn').addEventListener('click', () => {
-      if (!bookmark) return;
-      loadChapter(bookmark.chapterIndex);
-      document.getElementById('chapterSelect').value = bookmark.chapterIndex;
-      if (readingMode === 'sections' && bookmark.sectionIndex != null) { currentSection = bookmark.sectionIndex; renderSectionsMode(); }
-    });
-    document.getElementById('clearBookmarkBtn').addEventListener('click', () => { bookmark = null; localStorage.removeItem(BOOKMARK_KEY); updateBookmarkUI(); });
-    updateBookmarkUI();
+    loadAnnotations();
 
     function detectReadingMode(ch) {
-      const stored = localStorage.getItem(READING_MODE_KEY);
+      let stored = null;
+      try { stored = localStorage.getItem(READING_MODE_KEY); } catch (e) {}
       if (stored && ['sections','full','pages'].includes(stored)) readingMode = stored;
       else if (ch.sections && ch.sections.length > 0) readingMode = 'sections';
       else readingMode = 'full';
@@ -13461,7 +13672,7 @@
       stopSpeaking();
       readingMode = readingModeSelect.value;
       currentPage = 0;
-      localStorage.setItem(READING_MODE_KEY, readingMode);
+      try { localStorage.setItem(READING_MODE_KEY, readingMode); } catch (e) {}
       if (currentChapter) renderWithMode();
     });
 
@@ -13471,7 +13682,7 @@
       bookData.chapters.forEach((ch, idx) => {
         const opt = document.createElement("option");
         opt.value = idx;
-        opt.textContent = LABEL + " " + ch.id + ": " + ch.title;
+        opt.textContent = "Ch. " + ch.id + ": " + ch.title;
         select.appendChild(opt);
       });
       select.addEventListener("change", (e) => loadChapter(parseInt(e.target.value)));
@@ -13483,14 +13694,13 @@
       currentChapter = bookData.chapters[index];
       currentSection = 0;
       currentPage = 0;
-      document.querySelector(".title").textContent = "📖 " + bookData.title + " – " + LABEL + " " + currentChapter.id;
+      fullAudioSection = 0;
+      document.querySelector(".title").textContent = "📖 " + bookData.title + " – Ch. " + currentChapter.id;
       detectReadingMode(currentChapter);
       readingModeSelect.value = readingMode;
       setupAudioForChapter(currentChapter);
       renderWithMode();
       saveFullProgress();
-      updateProgressBar();
-      updateMarkReadUI();
     }
 
     function renderWithMode() {
@@ -13505,17 +13715,70 @@
       }
     }
 
+    // Section-by-section audio (EN + 中文) in every reading mode, not just Sections mode.
+    let fullAudioSection = 0;
+    function sectionIndexForParagraph(n) {
+      const secs = currentChapter.sections || [];
+      let total = 0;
+      for (let i = 0; i < secs.length; i++) {
+        total += (secs[i].paragraphs || []).length;
+        if (n < total) return i;
+      }
+      return Math.max(0, secs.length - 1);
+    }
+    function chapterLevelAudio() {
+      return { audio: currentChapter.audio || '', audioZh: currentChapter.audioZh || '', heading: currentChapter.title || '' };
+    }
+    function hasAudioData(o) { return !!(o && (o.audio || o.audioZh)); }
+    function loadAudioForNonSectionView(forFull) {
+      const sel = document.getElementById('audioSectionSelect');
+      const secs = currentChapter.sections || [];
+      const chapterAudio = chapterLevelAudio();
+      if (forFull) {
+        // Options: whole-chapter audio (value -1, if the chapter has any) + every section that has audio.
+        const opts = [];
+        if (hasAudioData(chapterAudio)) opts.push(-1);
+        secs.forEach((s, i) => { if (hasAudioData(s)) opts.push(i); });
+        sel.innerHTML = '';
+        opts.forEach(i => {
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          opt.textContent = i === -1 ? 'Whole chapter' : ((i + 1) + '. ' + (secs[i].heading || ('Section ' + (i + 1))));
+          sel.appendChild(opt);
+        });
+        if (!opts.length) { sel.style.display = 'none'; loadSectionAudio(null); return; }
+        if (opts.indexOf(fullAudioSection) < 0) fullAudioSection = opts[0];
+        sel.value = String(fullAudioSection);
+        sel.style.display = opts.length > 1 ? '' : 'none';
+        loadSectionAudio(fullAudioSection === -1 ? chapterAudio : secs[fullAudioSection]);
+      } else {
+        sel.style.display = 'none';
+        const sec = secs.length ? secs[sectionIndexForParagraph(currentPage * PAGE_SIZE)] : null;
+        loadSectionAudio(hasAudioData(sec) ? sec : (hasAudioData(chapterAudio) ? chapterAudio : null));
+      }
+    }
+    document.getElementById('audioSectionSelect').addEventListener('change', function() {
+      const v = parseInt(this.value, 10);
+      fullAudioSection = isNaN(v) ? 0 : v;
+      stopSpeaking();
+      const secs = currentChapter.sections || [];
+      loadSectionAudio(fullAudioSection === -1 ? chapterLevelAudio() : secs[fullAudioSection]);
+    });
+
     function renderFullMode() {
       document.getElementById('sectionTabs').innerHTML = '';
       document.getElementById('sectionProgress').textContent = '';
+      document.getElementById('sectionBottomNav').style.display = 'none';
       const paragraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
       renderParagraphs(paragraphs);
       renderQuiz(currentChapter.quiz || []);
       applyMobileLang(mobileLang);
+      loadAudioForNonSectionView(true);
     }
 
     function renderPagesMode() {
       document.getElementById('sectionTabs').innerHTML = '';
+      document.getElementById('sectionBottomNav').style.display = 'none';
       const allParagraphs = currentChapter.paragraphs || (currentChapter.sections ? currentChapter.sections.flatMap(s => s.paragraphs) : []);
       const totalPages = Math.max(1, Math.ceil(allParagraphs.length / PAGE_SIZE));
       if (currentPage >= totalPages) currentPage = totalPages - 1;
@@ -13542,6 +13805,57 @@
 
       renderQuiz(currentChapter.quiz || []);
       applyMobileLang(mobileLang);
+      loadAudioForNonSectionView(false);
+    }
+
+    function scrollToTopOfReading(smooth) {
+      const doScroll = () => {
+        window.scrollTo({ top: 0, left: 0, behavior: smooth ? 'smooth' : 'auto' });
+        const enCol = document.getElementById('enCol');
+        const zhCol = document.getElementById('zhCol');
+        if (enCol) enCol.scrollTop = 0;
+        if (zhCol) zhCol.scrollTop = 0;
+      };
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+      doScroll();
+      requestAnimationFrame(doScroll);
+      setTimeout(doScroll, 50);
+      setTimeout(doScroll, 200);
+      setTimeout(doScroll, 500);
+    }
+
+    function goToSection(idx) {
+      const sections = currentChapter.sections;
+      if (!sections || idx < 0 || idx >= sections.length) return;
+      stopSpeaking();
+      currentSection = idx;
+      renderSectionsMode();
+      saveFullProgress();
+      scrollToTopOfReading(true);
+    }
+
+    function renderSectionBottomNav() {
+      const sections = currentChapter.sections;
+      const nav = document.getElementById('sectionBottomNav');
+      nav.innerHTML = '';
+      if (!sections || sections.length <= 1) { nav.style.display = 'none'; return; }
+      nav.style.display = 'flex';
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-nav-btn'; prevBtn.textContent = '⬅ Previous Section';
+      prevBtn.disabled = currentSection === 0;
+      prevBtn.addEventListener('click', (e) => { e.currentTarget.blur(); goToSection(currentSection - 1); });
+      const label = document.createElement('span');
+      label.className = 'page-nav-label';
+      label.textContent = 'Section ' + (currentSection + 1) + ' of ' + sections.length;
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-nav-btn'; nextBtn.textContent = 'Next Section ➡';
+      nextBtn.disabled = currentSection >= sections.length - 1;
+      nextBtn.addEventListener('click', (e) => { e.currentTarget.blur(); goToSection(currentSection + 1); });
+      nav.appendChild(prevBtn);
+      nav.appendChild(label);
+      nav.appendChild(nextBtn);
     }
 
     function renderSectionsMode() {
@@ -13564,53 +13878,160 @@
       document.getElementById('sectionProgress').textContent = 'Section ' + (currentSection+1) + ' of ' + sections.length;
       renderParagraphs(sections[currentSection].paragraphs);
       renderQuiz(sections[currentSection].quiz || []);
+      document.getElementById('audioSectionSelect').style.display = 'none';
       loadSectionAudio(sections[currentSection]);
+      renderSectionBottomNav();
       applyMobileLang(mobileLang);
-      updateMarkReadUI();
     }
 
-    // ----- KEY FIX: renderParagraphs now handles "image" field -----
+    function getParagraphImages(p) {
+      if (Array.isArray(p.images) && p.images.length) {
+        return p.images.map(im => ({ src: im.src, alt: im.alt || 'illustration' }));
+      }
+      if (p.image) {
+        return [{ src: p.image, alt: p.imageAlt || 'illustration' }];
+      }
+      return [];
+    }
+
+    function collectTextNodesInOrder(root) {
+      const nodes = [];
+      (function walk(n) {
+        if (n.nodeType === Node.TEXT_NODE) { nodes.push(n); return; }
+        for (const child of Array.from(n.childNodes)) walk(child);
+      })(root);
+      return nodes;
+    }
+    function getTextOffsetInElement(root, node, offset) {
+      let total = 0, found = false;
+      (function walk(n) {
+        if (found) return;
+        if (n === node) { total += offset; found = true; return; }
+        if (n.nodeType === Node.TEXT_NODE) { total += n.nodeValue.length; return; }
+        for (const child of Array.from(n.childNodes)) { walk(child); if (found) return; }
+      })(root);
+      return total;
+    }
+    function wrapRangeInElement(root, start, end, wrapFn) {
+      let pos = 0;
+      const textNodes = collectTextNodesInOrder(root);
+      for (const tn of textNodes) {
+        const len = tn.nodeValue.length;
+        const nodeStart = pos, nodeEnd = pos + len;
+        if (nodeEnd > start && nodeStart < end) {
+          const localStart = Math.max(0, start - nodeStart);
+          const localEnd = Math.min(len, end - nodeStart);
+          if (localStart < localEnd) {
+            const range = document.createRange();
+            range.setStart(tn, localStart);
+            range.setEnd(tn, localEnd);
+            wrapFn(range);
+          }
+        }
+        pos += len;
+      }
+    }
+    function applyHighlightMark(pEl, start, end, id, hasNote) {
+      try {
+        wrapRangeInElement(pEl, start, end, (range) => {
+          const mark = document.createElement('mark');
+          mark.className = 'user-hl' + (hasNote ? ' has-note' : '');
+          mark.dataset.hlId = id;
+          range.surroundContents(mark);
+        });
+      } catch (e) { }
+    }
+
+    function currentAnnotationScope() {
+      if (readingMode === 'sections') return { mode: 'sections', sectionIdx: currentSection };
+      if (readingMode === 'pages') return { mode: 'pages', pageIdx: currentPage };
+      return { mode: 'full' };
+    }
+    function annotationParaKey(idx, col, scope) {
+      scope = scope || currentAnnotationScope();
+      const scopePart = scope.mode === 'sections' ? ('s' + scope.sectionIdx) : scope.mode === 'pages' ? ('p' + scope.pageIdx) : 'full';
+      return currentChapterIndex + '_' + scopePart + '_' + idx + '_' + col;
+    }
+    function applyStoredHighlights(pEl, idx, col) {
+      const key = annotationParaKey(idx, col);
+      const list = annotations[key];
+      if (!list || !list.length) return;
+      const variant = isSimplified ? 'simp' : 'orig';
+      list.filter(a => (a.variant || 'orig') === variant)
+          .slice().sort((a, b) => a.start - b.start)
+          .forEach(a => applyHighlightMark(pEl, a.start, a.end, a.id, !!a.note));
+    }
+
     function renderParagraphs(paragraphs) {
+      if (typeof stopReadAloud === 'function') stopReadAloud();
       const enDiv = document.getElementById('enContent');
       const zhDiv = document.getElementById('zhContent');
       enDiv.innerHTML = ''; zhDiv.innerHTML = '';
-      paragraphs.forEach(p => {
-        // If there is an image property, show it before the English text
-        if (p.image) {
+      paragraphs.forEach((p, idx) => {
+        const images = getParagraphImages(p);
+        if (images.length) {
           const imgDiv = document.createElement('div');
-          imgDiv.className = 'paragraph-image';
-          imgDiv.innerHTML = '<img src="' + p.image + '" alt="illustration">';
+          imgDiv.className = 'paragraph-image' + (images.length > 1 ? ' paragraph-image-multi' : '');
+          images.forEach(im => {
+            const img = document.createElement('img');
+            img.src = im.src;
+            img.alt = im.alt;
+            imgDiv.appendChild(img);
+          });
           enDiv.appendChild(imgDiv);
         }
         const enContent = isSimplified ? ((() => { const d = document.createElement('div'); d.innerHTML = p.simpEn || ''; return d.textContent; })()) : p.en;
-        const enP = document.createElement('p'); enP.innerHTML = enContent;
+        const enP = document.createElement('p'); enP.innerHTML = enContent; enP.dataset.idx = idx;
         enDiv.appendChild(enP);
-        const zhP = document.createElement('p'); zhP.textContent = isSimplified ? p.simpZh : p.zh;
+        applyStoredHighlights(enP, idx, 'en');
+        const zhP = document.createElement('p'); zhP.textContent = isSimplified ? p.simpZh : p.zh; zhP.dataset.idx = idx;
         zhDiv.appendChild(zhP);
+        applyStoredHighlights(zhP, idx, 'zh');
       });
+      const enColEl = document.getElementById('enCol');
+      const zhColEl = document.getElementById('zhCol');
+      if (enColEl) enColEl.scrollTop = 0;
+      if (zhColEl) zhColEl.scrollTop = 0;
     }
 
-    // ----- Quiz rendering (unchanged, includes rationale) -----
+    document.getElementById('darkModeToggle').addEventListener('click', function() {
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark-mode', darkMode);
+      this.textContent = darkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+      try { localStorage.setItem('wt_darkMode', JSON.stringify(darkMode)); } catch(e) {}
+    });
+    try {
+      const saved = JSON.parse(localStorage.getItem('wt_darkMode'));
+      if (saved) {
+        darkMode = true;
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeToggle').textContent = '☀️ Light Mode';
+      }
+    } catch(e) {}
+
+    function printEscapeHtml(text) {
+      const d = document.createElement('div');
+      d.textContent = text == null ? '' : String(text);
+      return d.innerHTML;
+    }
     function renderQuiz(quizArr) {
       const tfContainer = document.getElementById('tfQuestions');
       tfContainer.innerHTML = '';
       const quizToUse = (quizArr && quizArr.length) ? quizArr : placeholderQuiz;
       quizToUse.forEach((q, i) => {
         const div = document.createElement('div'); div.className = 'quiz-item-wrapper';
-        div.innerHTML = `
-          <div><strong>${i+1}.</strong> ${q.text}
-            <select class='tf-sel' style='width:auto; display:inline-block; margin-left:0.5rem; padding:0.2rem 0.5rem;'>
-              <option value=''>--</option><option value='true'>True</option><option value='false'>False</option>
-            </select>
-          </div>
-          <div class='rationale-container'></div>
-        `;
+        div.innerHTML = '' +
+          '<div><strong>' + (i+1) + '.</strong> ' + printEscapeHtml(q.text) +
+            '<select class="tf-sel" style="width:auto; display:inline-block; margin-left:0.5rem; padding:0.2rem 0.5rem;">' +
+              '<option value="">--</option><option value="true">True</option><option value="false">False</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="rationale-container"></div>';
         tfContainer.appendChild(div);
       });
       document.getElementById('tfFeedback').textContent = '';
     }
 
-    // ... rest of reader JS unchanged (simplify, speak, check quiz, progress) ...
     document.getElementById('simplifyToggle').addEventListener('click', () => {
       stopSpeaking();
       isSimplified = !isSimplified;
@@ -13621,14 +14042,25 @@
     });
 
     const popup = document.getElementById('vocabPopup');
+    function speakText(text) {
+      if (!text || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utter);
+    }
     function showPopup(trigger, vocabKey) {
       const def = vocabDefinitions[vocabKey];
       if (!def) return;
       document.getElementById('popupZh').textContent = def.zh;
       document.getElementById('popupExplain').textContent = '📘 ' + def.explain;
       document.getElementById('popupSimple').textContent = '💬 Simple: ' + def.simple;
+      const ipaEl = document.getElementById('popupIpa');
+      if (def.ipa) { ipaEl.textContent = def.ipa; ipaEl.style.display = 'block'; }
+      else { ipaEl.textContent = ''; ipaEl.style.display = 'none'; }
+      const exEl = document.getElementById('popupExample');
+      if (def.example) { exEl.innerHTML = '<span class="lbl">📝 Example:</span>' + printEscapeHtml(def.example); exEl.style.display = 'block'; }
+      else { exEl.textContent = ''; exEl.style.display = 'none'; }
       if (window.innerWidth <= 640) {
-        // Mobile: pin to bottom of viewport via CSS class (CSS handles position)
         popup.style.top = ''; popup.style.left = '';
         popup.style.bottom = '1rem'; popup.style.left = '1rem'; popup.style.right = '1rem'; popup.style.width = 'auto'; popup.style.maxWidth = 'none';
       } else {
@@ -13643,57 +14075,591 @@
     }
     function hidePopup() { popup.classList.remove('show'); currentVocabTrigger = null; }
     document.addEventListener('click', function(e) {
+      if (e.target.closest('mark.user-hl')) return;
       const trig = e.target.closest('.vocab-trigger');
       if (trig && trig !== currentVocabTrigger) { e.stopPropagation(); showPopup(trig, trig.getAttribute('data-vocab')); }
       else if (trig === currentVocabTrigger) hidePopup();
       else if (!e.target.closest('#vocabPopup')) hidePopup();
     });
     document.getElementById('closePopup').addEventListener('click', (e) => { e.stopPropagation(); hidePopup(); });
+    document.getElementById('popupSpeak').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentVocabTrigger) speakText(currentVocabTrigger.textContent);
+    });
     window.addEventListener('scroll', () => { if (currentVocabTrigger) hidePopup(); });
 
-    // ----- Per-Section Audio Player -----
+    const selToolbar = document.getElementById('selToolbar');
+    const noteEditorPopup = document.getElementById('noteEditorPopup');
+    const noteEditorQuote = document.getElementById('noteEditorQuote');
+    const noteEditorText = document.getElementById('noteEditorText');
+    const noteDeleteBtn = document.getElementById('noteDeleteBtn');
+    let pendingSelection = null;
+    let noteEditorContext = null;
+
+    function getSelectionInfo() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
+      const range = sel.getRangeAt(0);
+      const text = range.toString();
+      if (!text.trim()) return null;
+      let container = range.commonAncestorContainer;
+      if (container.nodeType !== 1) container = container.parentElement;
+      const pEl = container ? container.closest('p[data-idx]') : null;
+      if (!pEl) return null;
+      const enDivEl = document.getElementById('enContent');
+      const zhDivEl = document.getElementById('zhContent');
+      const col = enDivEl.contains(pEl) ? 'en' : (zhDivEl.contains(pEl) ? 'zh' : null);
+      if (!col) return null;
+      const idx = parseInt(pEl.dataset.idx, 10);
+      const start = getTextOffsetInElement(pEl, range.startContainer, range.startOffset);
+      const end = getTextOffsetInElement(pEl, range.endContainer, range.endOffset);
+      if (!(end > start)) return null;
+      return { pEl, col, idx, start, end, text, rect: range.getBoundingClientRect() };
+    }
+    function positionFloatingEl(el, rect, fallbackWidth) {
+      if (window.innerWidth <= 640) return;
+      const w = fallbackWidth || el.offsetWidth || 260;
+      let top = rect.top - el.offsetHeight - 10;
+      if (top < 8) top = rect.bottom + 10;
+      let left = rect.left + rect.width / 2 - w / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+      el.style.top = top + 'px';
+      el.style.left = left + 'px';
+    }
+    function showSelectionToolbar() {
+      const info = getSelectionInfo();
+      if (!info) { selToolbar.style.display = 'none'; pendingSelection = null; return; }
+      pendingSelection = info;
+      selToolbar.style.display = 'flex';
+      positionFloatingEl(selToolbar, info.rect, 170);
+    }
+    function clearSelectionUI() {
+      selToolbar.style.display = 'none';
+      pendingSelection = null;
+      const sel = window.getSelection();
+      if (sel) sel.removeAllRanges();
+    }
+    ['enContent', 'zhContent'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('mouseup', () => setTimeout(showSelectionToolbar, 0));
+      el.addEventListener('touchend', () => setTimeout(showSelectionToolbar, 0));
+    });
+    document.addEventListener('mousedown', (e) => {
+      if (selToolbar.style.display === 'none') return;
+      if (selToolbar.contains(e.target) || e.target.closest('#enContent') || e.target.closest('#zhContent')) return;
+      selToolbar.style.display = 'none';
+    });
+    document.addEventListener('mousedown', (e) => {
+      if (noteEditorPopup.style.display === 'none') return;
+      if (noteEditorPopup.contains(e.target) || e.target.closest('mark.user-hl') || e.target.closest('#selToolbar')) return;
+      closeNoteEditor();
+    });
+    window.addEventListener('scroll', () => { selToolbar.style.display = 'none'; });
+
+    function annotationLocatorLabel(scope) {
+      if (scope.mode === 'sections' && currentChapter && currentChapter.sections && currentChapter.sections[scope.sectionIdx]) {
+        return currentChapter.sections[scope.sectionIdx].heading || ('Section ' + (scope.sectionIdx + 1));
+      }
+      if (scope.mode === 'pages') return 'Page ' + (scope.pageIdx + 1);
+      return '';
+    }
+    function saveNewAnnotation(info, noteText) {
+      const key = annotationParaKey(info.idx, info.col);
+      if (!annotations[key]) annotations[key] = [];
+      const scope = currentAnnotationScope();
+      const id = 'hl_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const record = {
+        id: id, start: info.start, end: info.end, text: info.text, note: noteText || '',
+        col: info.col, variant: isSimplified ? 'simp' : 'orig',
+        chapterIdx: currentChapterIndex,
+        chapterTitle: currentChapter ? ('Ch. ' + currentChapter.id + (currentChapter.title ? ' – ' + currentChapter.title : '')) : '',
+        mode: scope.mode, sectionIdx: scope.sectionIdx, pageIdx: scope.pageIdx,
+        locatorLabel: annotationLocatorLabel(scope),
+        ts: Date.now()
+      };
+      annotations[key].push(record);
+      saveAnnotationsStore();
+      applyHighlightMark(info.pEl, info.start, info.end, id, !!noteText);
+      updateNotesPanelCount();
+      return record;
+    }
+    document.getElementById('selHighlightBtn').addEventListener('click', () => {
+      if (!pendingSelection) return;
+      saveNewAnnotation(pendingSelection, '');
+      clearSelectionUI();
+    });
+    document.getElementById('selNoteBtn').addEventListener('click', () => {
+      if (!pendingSelection) return;
+      openNoteEditor(pendingSelection, null);
+    });
+
+    function openNoteEditor(info, existingId) {
+      selToolbar.style.display = 'none';
+      let rect;
+      if (existingId) {
+        const found = findAnnotationById(existingId);
+        if (!found) return;
+        noteEditorContext = { mode: 'edit', id: existingId };
+        noteEditorQuote.textContent = '"' + found.ann.text + '"';
+        noteEditorText.value = found.ann.note || '';
+        noteDeleteBtn.style.display = 'inline-block';
+        noteDeleteBtn.textContent = '🗑 Remove Highlight';
+        const marks = document.querySelectorAll('mark.user-hl[data-hl-id="' + existingId + '"]');
+        rect = marks.length ? marks[0].getBoundingClientRect() : { top: 100, bottom: 140, left: 40, width: 100 };
+      } else {
+        noteEditorContext = { mode: 'new', info: info };
+        noteEditorQuote.textContent = '"' + info.text + '"';
+        noteEditorText.value = '';
+        noteDeleteBtn.style.display = 'none';
+        rect = info.rect;
+      }
+      noteEditorPopup.style.display = 'block';
+      positionFloatingEl(noteEditorPopup, rect, 300);
+      noteEditorText.focus();
+    }
+    function closeNoteEditor() {
+      noteEditorPopup.style.display = 'none';
+      noteEditorContext = null;
+    }
+    document.getElementById('noteCancelBtn').addEventListener('click', () => {
+      closeNoteEditor();
+      clearSelectionUI();
+    });
+    document.getElementById('noteSaveBtn').addEventListener('click', () => {
+      if (!noteEditorContext) return;
+      const text = noteEditorText.value.trim();
+      if (noteEditorContext.mode === 'new') {
+        saveNewAnnotation(noteEditorContext.info, text);
+      } else {
+        const found = findAnnotationById(noteEditorContext.id);
+        if (found) {
+          found.ann.note = text;
+          saveAnnotationsStore();
+          document.querySelectorAll('mark.user-hl[data-hl-id="' + noteEditorContext.id + '"]').forEach(m => {
+            m.classList.toggle('has-note', !!text);
+          });
+        }
+      }
+      closeNoteEditor();
+      clearSelectionUI();
+      updateNotesPanelCount();
+    });
+    function deleteAnnotation(id) {
+      const found = findAnnotationById(id);
+      if (!found) return;
+      annotations[found.key].splice(found.index, 1);
+      if (!annotations[found.key].length) delete annotations[found.key];
+      saveAnnotationsStore();
+      document.querySelectorAll('mark.user-hl[data-hl-id="' + id + '"]').forEach(m => {
+        const parent = m.parentNode;
+        while (m.firstChild) parent.insertBefore(m.firstChild, m);
+        parent.removeChild(m);
+        parent.normalize();
+      });
+      updateNotesPanelCount();
+    }
+    document.getElementById('noteDeleteBtn').addEventListener('click', () => {
+      if (!noteEditorContext || noteEditorContext.mode !== 'edit') return;
+      deleteAnnotation(noteEditorContext.id);
+      closeNoteEditor();
+    });
+    document.addEventListener('click', (e) => {
+      const mark = e.target.closest('mark.user-hl');
+      if (!mark) return;
+      e.stopPropagation();
+      openNoteEditor(null, mark.dataset.hlId);
+    });
+
+    const notesPanelOverlay = document.getElementById('notesPanelOverlay');
+    function updateNotesPanelCount() {
+      const countEl = document.getElementById('notesPanelBtnCount');
+      const n = allAnnotations().length;
+      if (n > 0) { countEl.textContent = String(n); countEl.style.display = 'inline-block'; }
+      else { countEl.style.display = 'none'; }
+    }
+    function escapeHtmlNP(text) {
+      const d = document.createElement('div');
+      d.textContent = text == null ? '' : String(text);
+      return d.innerHTML;
+    }
+    function renderNotesPanel() {
+      const list = document.getElementById('notesPanelList');
+      const items = allAnnotations().sort((a, b) => (a.chapterIdx - b.chapterIdx) || (a.ts - b.ts));
+      if (!items.length) {
+        list.innerHTML = '<div class="notes-panel-empty">No highlights or notes yet. Select any text in the reader and choose 🖍 Highlight or 📝 Note.</div>';
+        return;
+      }
+      let html = '';
+      let lastChapterIdx = null;
+      items.forEach(a => {
+        if (a.chapterIdx !== lastChapterIdx) {
+          html += '<div class="notes-panel-group-title">' + escapeHtmlNP(a.chapterTitle || ('Chapter ' + (a.chapterIdx + 1))) + '</div>';
+          lastChapterIdx = a.chapterIdx;
+        }
+        const meta = [a.col === 'en' ? '🇬🇧 English' : '🇨🇳 Chinese', a.locatorLabel, new Date(a.ts).toLocaleDateString()].filter(Boolean).join(' · ');
+        html += '<div class="notes-panel-item" data-ann-id="' + a.id + '">' +
+          '<div class="np-quote">' + escapeHtmlNP(a.text) + '</div>' +
+          (a.note ? '<div class="np-note">📝 ' + escapeHtmlNP(a.note) + '</div>' : '') +
+          '<div class="np-meta">' + escapeHtmlNP(meta) + '</div>' +
+          '<div class="np-actions">' +
+            '<button class="np-goto-btn" data-ann-id="' + a.id + '">📍 Go to</button>' +
+            '<button class="np-del-btn" data-ann-id="' + a.id + '">🗑 Delete</button>' +
+          '</div></div>';
+      });
+      list.innerHTML = html;
+    }
+    function openNotesPanel() {
+      stopSpeaking();
+      if (typeof stopReadAloud === 'function') stopReadAloud();
+      renderNotesPanel();
+      notesPanelOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeNotesPanel() {
+      notesPanelOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('notesPanelBtn').addEventListener('click', openNotesPanel);
+    document.getElementById('notesPanelCloseBtn').addEventListener('click', closeNotesPanel);
+    notesPanelOverlay.addEventListener('click', (e) => { if (e.target === notesPanelOverlay) closeNotesPanel(); });
+    document.getElementById('notesPanelList').addEventListener('click', (e) => {
+      const gotoBtn = e.target.closest('.np-goto-btn');
+      const delBtn = e.target.closest('.np-del-btn');
+      if (gotoBtn) {
+        const found = findAnnotationById(gotoBtn.dataset.annId);
+        if (found) jumpToAnnotation(found.ann);
+      } else if (delBtn) {
+        if (confirm('Delete this highlight/note?')) {
+          deleteAnnotation(delBtn.dataset.annId);
+          renderNotesPanel();
+        }
+      }
+    });
+    function jumpToAnnotation(ann) {
+      closeNotesPanel();
+      stopSpeaking();
+      if (typeof stopReadAloud === 'function') stopReadAloud();
+      currentChapterIndex = ann.chapterIdx;
+      currentChapter = bookData.chapters[ann.chapterIdx];
+      if (!currentChapter) return;
+      isSimplified = (ann.variant === 'simp');
+      document.getElementById('simpActiveLabel').classList.toggle('active', isSimplified);
+      document.getElementById('simplifyToggle').textContent = isSimplified ? '📖 Switch back to Original' : '📖 Switch to Simplified';
+      readingMode = ann.mode === 'sections' ? 'sections' : (ann.mode === 'pages' ? 'pages' : 'full');
+      currentSection = ann.mode === 'sections' ? (ann.sectionIdx || 0) : 0;
+      currentPage = ann.mode === 'pages' ? (ann.pageIdx || 0) : 0;
+      document.querySelector('.title').textContent = '📖 ' + bookData.title + ' – Ch. ' + currentChapter.id;
+      const chSelect = document.getElementById('chapterSelect');
+      if (chSelect) chSelect.value = String(ann.chapterIdx);
+      readingModeSelect.value = readingMode;
+      setupAudioForChapter(currentChapter);
+      renderWithMode();
+      saveFullProgress();
+      scrollToTopOfReading(false);
+      setTimeout(() => {
+        const marks = document.querySelectorAll('mark.user-hl[data-hl-id="' + ann.id + '"]');
+        if (marks.length) {
+          marks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          marks.forEach(m => {
+            m.classList.add('flash-hl');
+            setTimeout(() => m.classList.remove('flash-hl'), 1700);
+          });
+        }
+      }, 250);
+    }
+    function exportAnnotations() {
+      const items = allAnnotations().sort((a, b) => (a.chapterIdx - b.chapterIdx) || (a.ts - b.ts));
+      if (!items.length) { alert('No highlights or notes to export yet.'); return; }
+      let out = bookData.title + ' — Highlights & Notes\n' + '='.repeat(40) + '\n\n';
+      let lastChapterIdx = null;
+      items.forEach(a => {
+        if (a.chapterIdx !== lastChapterIdx) {
+          out += '\n' + (a.chapterTitle || ('Chapter ' + (a.chapterIdx + 1))) + '\n' + '-'.repeat(30) + '\n';
+          lastChapterIdx = a.chapterIdx;
+        }
+        out += '\n"' + a.text + '"\n';
+        if (a.note) out += '  Note: ' + a.note + '\n';
+        out += '  (' + (a.col === 'en' ? 'English' : 'Chinese') + (a.locatorLabel ? ', ' + a.locatorLabel : '') + ', ' + new Date(a.ts).toLocaleDateString() + ')\n';
+      });
+      const blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a2 = document.createElement('a');
+      a2.href = url;
+      a2.download = bookData.title.replace(/\s+/g, '_') + '_notes.txt';
+      document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById('notesExportBtn').addEventListener('click', exportAnnotations);
+
+    function collectBackupData() {
+      const data = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k === null) continue;
+        if (k.indexOf(BOOK_KEY + '_') === 0 || k === 'wt_darkMode' || k === FONT_SCALE_KEY) {
+          data[k] = localStorage.getItem(k);
+        }
+      }
+      return data;
+    }
+    function exportAllData() {
+      const data = collectBackupData();
+      if (!Object.keys(data).length) { alert('Nothing saved yet for this book.'); return; }
+      const payload = {
+        app: 'Words That Think — Bilingual Reader backup',
+        book: bookData.title,
+        bookKey: BOOK_KEY,
+        exportedAt: new Date().toISOString(),
+        data: data
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a3 = document.createElement('a');
+      a3.href = url;
+      a3.download = bookData.title.replace(/\s+/g, '_') + '_backup.json';
+      document.body.appendChild(a3); a3.click(); document.body.removeChild(a3);
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById('dataExportBtn').addEventListener('click', exportAllData);
+
+    document.getElementById('dataImportBtn').addEventListener('click', () => {
+      document.getElementById('dataImportInput').click();
+    });
+    document.getElementById('dataImportInput').addEventListener('change', function() {
+      const file = this.files[0];
+      this.value = '';
+      if (!file) return;
+      const fileReader = new FileReader();
+      fileReader.onload = function(ev) {
+        let payload;
+        try {
+          payload = JSON.parse(ev.target.result);
+        } catch (e) {
+          alert('That file is not a valid backup (could not parse JSON).');
+          return;
+        }
+        if (!payload || typeof payload.data !== 'object' || !payload.data) {
+          alert('That file does not look like a backup made by this reader.');
+          return;
+        }
+        const keys = Object.keys(payload.data);
+        if (!keys.length) { alert('That backup file has no saved data in it.'); return; }
+        let msg = 'Import ' + keys.length + ' saved item(s)' + (payload.book ? ' from "' + payload.book + '"' : '') + '?\n\n';
+        const legacyPrefix = bookData.title + "::" + (bookData.author || "") + "::";
+        const fromLegacy = payload.bookKey !== BOOK_KEY && typeof payload.bookKey === 'string' && payload.bookKey.indexOf(legacyPrefix) === 0;
+        if (payload.bookKey === BOOK_KEY || fromLegacy) {
+          msg += 'This will overwrite the current reading progress, settings, highlights and notes stored on this device for this book.';
+        } else {
+          msg += 'Note: this backup was made from a different book. Shared settings (dark mode, text size) will still apply here, but that book\'s progress and highlights are stored separately and won\'t appear in this reader.';
+        }
+        if (!confirm(msg)) return;
+        try {
+          keys.forEach(k => {
+            let dest = k;
+            if (fromLegacy && k.indexOf(payload.bookKey + '_') === 0) dest = BOOK_KEY + k.slice(payload.bookKey.length);
+            localStorage.setItem(dest, payload.data[k]);
+          });
+        } catch (e) {
+          alert('Could not write the imported data to this browser\'s storage: ' + e.message);
+          return;
+        }
+        alert('Import complete. The page will now reload to apply it.');
+        location.reload();
+      };
+      fileReader.onerror = function() { alert('Could not read that file.'); };
+      fileReader.readAsText(file);
+    });
+
+    updateNotesPanelCount();
+
+    let ttsPlaying = false;
+    function stopReadAloud() {
+      if (!ttsPlaying && !('speechSynthesis' in window && window.speechSynthesis.speaking)) return;
+      ttsPlaying = false;
+      window.speechSynthesis.cancel();
+      document.querySelectorAll('.tts-highlight').forEach(el => el.classList.remove('tts-highlight'));
+      const btn = document.getElementById('readAloudBtn');
+      if (btn) { btn.textContent = '🔊 Read Aloud'; btn.classList.remove('reading'); }
+    }
+    function startReadAloud() {
+      if (!('speechSynthesis' in window)) { alert('Text-to-speech is not supported in this browser.'); return; }
+      const enParagraphs = Array.from(document.querySelectorAll('#enContent p'));
+      if (enParagraphs.length === 0) return;
+      sectionAudio.pause();
+      window.speechSynthesis.cancel();
+      ttsPlaying = true;
+      const btn = document.getElementById('readAloudBtn');
+      btn.textContent = '⏹️ Stop Reading';
+      btn.classList.add('reading');
+      let i = 0;
+      function speakNext() {
+        if (!ttsPlaying || i >= enParagraphs.length) { stopReadAloud(); return; }
+        document.querySelectorAll('.tts-highlight').forEach(el => el.classList.remove('tts-highlight'));
+        const p = enParagraphs[i];
+        p.classList.add('tts-highlight');
+        p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const utter = new SpeechSynthesisUtterance(p.textContent);
+        utter.onend = () => { i++; speakNext(); };
+        utter.onerror = () => { i++; speakNext(); };
+        window.speechSynthesis.speak(utter);
+      }
+      speakNext();
+    }
+    document.getElementById('readAloudBtn').addEventListener('click', () => {
+      if (ttsPlaying) stopReadAloud(); else startReadAloud();
+    });
+
     const sectionAudio = document.getElementById('sectionAudio');
     const sectionAudioBar = document.getElementById('sectionAudioBar');
     const audioSectionLabel = document.getElementById('audioSectionLabel');
+    const audioLangToggle = document.getElementById('audioLangToggle');
+    let currentSectionAudioData = null;
+    let currentAudioLang = 'en';
+
+    function applyAudioLang(lang) {
+      if (!currentSectionAudioData) return;
+      currentAudioLang = lang;
+      const src = (lang === 'zh' && currentSectionAudioData.audioZh)
+                    ? currentSectionAudioData.audioZh
+                    : currentSectionAudioData.audio;
+      if (!src) return;
+      if (sectionAudio.getAttribute('src') !== src) {
+        const wasPlaying = !sectionAudio.paused;
+        sectionAudio.pause();
+        sectionAudio.src = src;
+        sectionAudio.load();
+        if (wasPlaying) {
+          sectionAudio.play().catch(() => {});
+        }
+      }
+      if (audioLangToggle) {
+        audioLangToggle.querySelectorAll('.audio-lang-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.lang === lang);
+        });
+      }
+    }
+
+    if (audioLangToggle) {
+      audioLangToggle.querySelectorAll('.audio-lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyAudioLang(btn.dataset.lang));
+      });
+    }
+
+    // The browser-voice Read Aloud is only a fallback: hide it when this section has an MP3.
+    function updateReadAloudVisibility(hasAudio) {
+      const raBtn = document.getElementById('readAloudBtn');
+      if (!raBtn) return;
+      if (hasAudio && typeof stopReadAloud === 'function') stopReadAloud();
+      raBtn.style.display = hasAudio ? 'none' : '';
+    }
 
     function loadSectionAudio(sec) {
-      if (sec && sec.audio) {
-        const src = sec.audio;
-        if (sectionAudio.getAttribute('src') !== src) {
-          sectionAudio.pause();
-          sectionAudio.src = src;
-          sectionAudio.load();
-        }
-        audioSectionLabel.textContent = sec.heading || '';
-        sectionAudioBar.style.display = 'flex';
-      } else {
+      currentSectionAudioData = sec || null;
+      const hasEn = !!(sec && sec.audio);
+      const hasZh = !!(sec && sec.audioZh);
+      updateReadAloudVisibility(hasEn || hasZh);
+      if (!hasEn && !hasZh) {
         sectionAudio.pause();
         sectionAudio.removeAttribute('src');
         sectionAudioBar.style.display = 'none';
         audioSectionLabel.textContent = '';
+        if (audioLangToggle) audioLangToggle.style.display = 'none';
+        return;
       }
+      currentAudioLang = hasEn ? 'en' : 'zh';
+      audioSectionLabel.textContent = (sec && sec.heading) ? sec.heading : '';
+      sectionAudioBar.style.display = 'flex';
+      if (audioLangToggle) {
+        audioLangToggle.style.display = (hasEn && hasZh) ? 'inline-flex' : 'none';
+      }
+      applyAudioLang(currentAudioLang);
     }
 
     function setupAudioForChapter(ch) {
-      // Called on chapter load — clear player; section audio loaded when section is rendered
       sectionAudio.pause();
       sectionAudio.removeAttribute('src');
       sectionAudioBar.style.display = 'none';
       audioSectionLabel.textContent = '';
+      currentSectionAudioData = null;
+      updateReadAloudVisibility(false);
+      if (audioLangToggle) audioLangToggle.style.display = 'none';
     }
-
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) sectionAudio.pause();
+      if (document.hidden) { sectionAudio.pause(); if (typeof stopReadAloud === 'function') stopReadAloud(); }
     });
+    sectionAudio.addEventListener('play', () => { if (typeof stopReadAloud === 'function') stopReadAloud(); });
 
-    // ----- EN/ZH Mobile Toggle & Swipe -----
+    function applyFontScale(scale, opts) {
+      fontScale = Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, scale));
+      document.documentElement.style.setProperty('--font-scale', fontScale);
+      const label = document.getElementById('fontScaleLabel');
+      if (label) label.textContent = Math.round(fontScale * 100) + '%';
+      try { localStorage.setItem(FONT_SCALE_KEY, String(fontScale)); } catch (e) {}
+      if (!opts || !opts.silent) restoreReadingAnchor(null, null);
+    }
+    (function initFontScale() {
+      let saved = null;
+      try { saved = parseFloat(localStorage.getItem(FONT_SCALE_KEY)); } catch (e) {}
+      applyFontScale(isNaN(saved) ? 1 : saved, { silent: true });
+    })();
+    document.getElementById('fontDecBtn').addEventListener('click', () => applyFontScale(fontScale - FONT_SCALE_STEP));
+    document.getElementById('fontIncBtn').addEventListener('click', () => applyFontScale(fontScale + FONT_SCALE_STEP));
+
+    function getHeaderBottom() {
+      const topBar = document.querySelector('.top-bar');
+      return topBar ? topBar.getBoundingClientRect().bottom : 0;
+    }
+    function findTopVisibleParagraph(col) {
+      if (!col) return null;
+      const headerBottom = getHeaderBottom();
+      const paras = col.querySelectorAll('p[data-idx]');
+      for (const p of paras) {
+        if (p.getBoundingClientRect().bottom > headerBottom + 1) return p;
+      }
+      return paras.length ? paras[paras.length - 1] : null;
+    }
+    function captureReadingAnchor(prevVisibleCol) {
+      const isMobile = window.innerWidth <= 640;
+      if (!isMobile || !prevVisibleCol) return null;
+      const p = findTopVisibleParagraph(prevVisibleCol);
+      if (!p) return null;
+      return { idx: p.dataset.idx, viewportTop: p.getBoundingClientRect().top };
+    }
+    function restoreReadingAnchor(anchor, targetCol) {
+      const isMobile = window.innerWidth <= 640;
+      if (!isMobile || !targetCol) {
+        requestAnimationFrame(() => {
+          const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          if (window.scrollY > maxScroll) window.scrollTo({ top: maxScroll, behavior: 'auto' });
+        });
+        return;
+      }
+      requestAnimationFrame(() => {
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        let targetY = window.scrollY;
+        const matchP = anchor ? targetCol.querySelector('p[data-idx="' + anchor.idx + '"]') : null;
+        if (anchor && matchP) {
+          const delta = matchP.getBoundingClientRect().top - anchor.viewportTop;
+          targetY = window.scrollY + delta;
+        } else {
+          const containerTop = colsContainer.getBoundingClientRect().top + window.pageYOffset;
+          targetY = Math.max(0, containerTop - getHeaderBottom() - 8);
+        }
+        targetY = Math.max(0, Math.min(targetY, maxScroll));
+        window.scrollTo({ top: targetY, behavior: 'auto' });
+      });
+    }
     function applyMobileLang(lang) {
-      mobileLang = lang;
       const enCol = document.getElementById('enCol');
       const zhCol = document.getElementById('zhCol');
       const btnEn = document.getElementById('toggleEnBtn');
       const btnZh = document.getElementById('toggleZhBtn');
-      if (window.innerWidth <= 640) {
+      const isMobile = window.innerWidth <= 640;
+      const prevVisibleCol = mobileLang === 'en' ? enCol : zhCol;
+      const langChanged = lang !== mobileLang;
+      const anchor = (isMobile && langChanged) ? captureReadingAnchor(prevVisibleCol) : null;
+      mobileLang = lang;
+      if (isMobile) {
         enCol.classList.toggle('mobile-visible', lang === 'en');
         zhCol.classList.toggle('mobile-visible', lang === 'zh');
       } else {
@@ -13702,32 +14668,49 @@
       }
       if (btnEn) btnEn.classList.toggle('active', lang === 'en');
       if (btnZh) btnZh.classList.toggle('active', lang === 'zh');
+      if (isMobile && langChanged) {
+        const targetCol = lang === 'en' ? enCol : zhCol;
+        restoreReadingAnchor(anchor, targetCol);
+      }
     }
-
     document.getElementById('toggleEnBtn').addEventListener('click', () => applyMobileLang('en'));
     document.getElementById('toggleZhBtn').addEventListener('click', () => applyMobileLang('zh'));
     window.addEventListener('resize', () => applyMobileLang(mobileLang));
 
-    // Swipe left = show Chinese, swipe right = show English
-    // Only triggers if horizontal movement clearly dominates vertical (not a scroll)
-    let swipeStartX = 0;
-    let swipeStartY = 0;
+    let swipeStartX = 0, swipeStartY = 0, swipeStartTime = 0, swipeIntent = null, lastSwipeAt = 0;
+    const SWIPE_COOLDOWN_MS = 500;
     const colsContainer = document.getElementById('colsContainer');
     colsContainer.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) { swipeIntent = 'scroll'; return; }
       swipeStartX = e.touches[0].clientX;
       swipeStartY = e.touches[0].clientY;
+      swipeStartTime = Date.now();
+      swipeIntent = null;
+    }, { passive: true });
+    colsContainer.addEventListener('touchmove', e => {
+      if (swipeIntent || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - swipeStartX;
+      const dy = e.touches[0].clientY - swipeStartY;
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+      swipeIntent = (Math.abs(dx) > Math.abs(dy) * 1.5) ? 'swipe' : 'scroll';
     }, { passive: true });
     colsContainer.addEventListener('touchend', e => {
+      if (swipeIntent !== 'swipe' || window.innerWidth > 640) return;
+      const now = Date.now();
+      if (now - lastSwipeAt < SWIPE_COOLDOWN_MS) return;
       const dx = e.changedTouches[0].clientX - swipeStartX;
       const dy = e.changedTouches[0].clientY - swipeStartY;
-      const isHorizontalSwipe = Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2;
-      if (isHorizontalSwipe && window.innerWidth <= 640) {
+      const elapsed = now - swipeStartTime;
+      const isDeliberateSwipe = Math.abs(dx) >= 90 && Math.abs(dx) > Math.abs(dy) * 2 && elapsed < 600;
+      if (isDeliberateSwipe) {
+        lastSwipeAt = now;
         applyMobileLang(dx < 0 ? 'zh' : 'en');
       }
     }, { passive: true });
 
-    // stub — called in simplify toggle and chapter load
-    function stopSpeaking() {}
+    function stopSpeaking() {
+      try { if (sectionAudio && !sectionAudio.paused) sectionAudio.pause(); } catch (e) {}
+    }
 
     document.getElementById('checkTfBtn').addEventListener('click', () => {
       const quizArr = currentChapter.sections && readingMode==='sections' ? (currentChapter.sections[currentSection]?.quiz || []) : (currentChapter.quiz || []);
@@ -13746,11 +14729,11 @@
           sel.style.border = '2px solid green';
           correct++;
           ratBox.style.borderLeft = '4px solid green';
-          ratBox.innerHTML = '<span style="color:green; font-weight:bold;">✓ Correct.</span> ' + (currentItem.rationale || '');
+          ratBox.innerHTML = '<span style="color:green; font-weight:bold;">✓ Correct.</span> ' + printEscapeHtml(currentItem.rationale || '');
         } else {
           sel.style.border = '2px solid red';
           ratBox.style.borderLeft = '4px solid red';
-          ratBox.innerHTML = '<span style="color:red; font-weight:bold;">✗ Incorrect.</span> ' + (currentItem.rationale || '');
+          ratBox.innerHTML = '<span style="color:red; font-weight:bold;">✗ Incorrect.</span> ' + printEscapeHtml(currentItem.rationale || '');
         }
       });
       document.getElementById('tfFeedback').textContent = 'Score: ' + correct + ' / ' + quizToUse.length;
@@ -13758,18 +14741,18 @@
 
     function saveFullProgress() {
       const state = { chapterIndex: currentChapterIndex, sectionIndex: (readingMode==='sections' && currentChapter.sections) ? currentSection : 0, pageIndex: (readingMode==='pages') ? currentPage : 0, readingMode };
-      localStorage.setItem(PROGRESS_KEY, JSON.stringify(state));
+      try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(state)); } catch (e) {}
       updateProgressIndicator();
     }
-
     function updateProgressIndicator() {
-      const saved = localStorage.getItem(PROGRESS_KEY);
+      let saved = null;
+      try { saved = localStorage.getItem(PROGRESS_KEY); } catch (e) {}
       if (saved) {
         try {
           const state = JSON.parse(saved);
           const ch = bookData.chapters[state.chapterIndex];
           if (ch) {
-            let info = '📌 Last read: ' + LABEL + ' ' + ch.id;
+            let info = '📌 Last read: Ch. ' + ch.id;
             if (ch.sections && state.sectionIndex) info += ' · ' + ch.sections[state.sectionIndex].heading;
             info += ' | ' + (state.chapterIndex+1) + '/' + bookData.chapters.length + ' chapters';
             document.getElementById('progressBox').textContent = info;
@@ -13777,9 +14760,9 @@
         } catch(e) {}
       }
     }
-
     function restoreProgress() {
-      const saved = localStorage.getItem(PROGRESS_KEY);
+      let saved = null;
+      try { saved = localStorage.getItem(PROGRESS_KEY); } catch (e) {}
       if (saved) {
         try {
           const state = JSON.parse(saved);
