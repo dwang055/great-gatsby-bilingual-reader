@@ -24,7 +24,6 @@ No sign-up, no download and no app needed. It works in any modern browser on a p
 | **Test yourself** | Short true/false questions with explanations appear after each section or chapter. |
 | **Highlight and take notes** | Select any text, then choose **🖍 Highlight** or **📝 Note**. Open **📒 My Notes** to see them all. |
 | **Make it comfortable** | **A− / A+** changes the text size. **🌙 Dark Mode** is easier on the eyes at night. |
-| **Print or save as PDF** *(eBook edition only)* | **🖨️ Print** → preview a section, chapter or the whole book, or **Save eBook as PDF**. |
 
 ## How the audio works
 
@@ -68,24 +67,6 @@ No sign-up, no download and no app needed. It works in any modern browser on a p
 - The generated reader is named `[Book Title]_reader.html`. **Rename it to `index.html`** so the link above works without a file name.
 - **Use lowercase and the exact names.** GitHub Pages treats `Ch01-s1.mp3` and `ch01-s1.mp3` as different files, even though your computer does not.
 
-### Publish for the first time
-
-1. Create a repository for the book and add `index.html`, the `audio` folder and this README.
-2. On GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` → Folder: `/ (root)` → Save**.
-3. After a minute or two the page is live at `https://dwang055.github.io/[repo-name]/`.
-
-### Update the book or the audio
-
-1. Replace `index.html` with the newly generated reader and add or replace files in `audio/`.
-2. In GitHub Desktop, write a short summary, **Commit to main**, then **Push origin**.
-3. Wait one to two minutes, then hard refresh the page (**Ctrl+F5**, or **Cmd+Shift+R** on a Mac).
-4. Keep the **Book ID** unchanged in the creator so students keep their notes.
-
-### Size
-
-GitHub rejects any single file over 100 MB, and a Pages site should stay under about 1 GB. A section recording is normally a few MB, so a full book fits comfortably.
-
----
 
 ## Troubleshooting
 
