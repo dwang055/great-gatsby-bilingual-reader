@@ -221,6 +221,11 @@
       <button type="button" data-lang="en" class="audio-lang-btn active">EN</button>
       <button type="button" data-lang="zh" class="audio-lang-btn">中文</button>
     </span>
+    <select id="audioPlayMode" title="What should play when this recording ends?" aria-label="Playback mode" style="padding:0.3rem 0.5rem; border-radius:6px; border:none; font-size:0.82rem; max-width:210px;">
+      <option value="section" selected>▸ This section only</option>
+      <option value="chapter">▸▸ Whole chapter</option>
+      <option value="book">▸▸▸ Whole book</option>
+    </select>
     <audio id="sectionAudio" controls></audio>
   </div>
 
@@ -14540,6 +14545,8 @@
     const audioLangToggle = document.getElementById('audioLangToggle');
     let currentSectionAudioData = null;
     let currentAudioLang = 'en';
+    let preferredAudioLang = 'en';   // the language the listener last chose; kept from section to section
+    let nowPlaying = null;           // { ci: chapter index, si: section index, -1 = chapter-level recording }
 
     function applyAudioLang(lang) {
       if (!currentSectionAudioData) return;
@@ -14566,7 +14573,7 @@
 
     if (audioLangToggle) {
       audioLangToggle.querySelectorAll('.audio-lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => applyAudioLang(btn.dataset.lang));
+        btn.addEventListener('click', () => { preferredAudioLang = btn.dataset.lang; applyAudioLang(btn.dataset.lang); });
       });
     }
 
@@ -14588,11 +14595,14 @@
         sectionAudio.removeAttribute('src');
         sectionAudioBar.style.display = 'none';
         audioSectionLabel.textContent = '';
+        nowPlaying = null;
         if (audioLangToggle) audioLangToggle.style.display = 'none';
         return;
       }
-      currentAudioLang = hasEn ? 'en' : 'zh';
-      audioSectionLabel.textContent = (sec && sec.heading) ? sec.heading : '';
+      const secsHere = (currentChapter && currentChapter.sections) || [];
+      nowPlaying = { ci: currentChapterIndex, si: secsHere.indexOf(sec) };
+      currentAudioLang = (preferredAudioLang === 'zh' && hasZh) ? 'zh' : (hasEn ? 'en' : 'zh');
+      refreshAudioLabel();
       sectionAudioBar.style.display = 'flex';
       if (audioLangToggle) {
         audioLangToggle.style.display = (hasEn && hasZh) ? 'inline-flex' : 'none';
@@ -14609,8 +14619,99 @@
       updateReadAloudVisibility(false);
       if (audioLangToggle) audioLangToggle.style.display = 'none';
     }
+    // ── Continuous listening: this section only (default) · whole chapter · whole book ──
+    function playMode() {
+      const el = document.getElementById('audioPlayMode');
+      return el ? el.value : 'section';
+    }
+    function audioItemsOfChapter(ci) {
+      const ch = bookData.chapters[ci], out = [];
+      if (!ch) return out;
+      if (ch.sections && ch.sections.length) {
+        ch.sections.forEach(function(s, i) { if (s && (s.audio || s.audioZh)) out.push({ ci: ci, si: i }); });
+      }
+      if (!out.length && (ch.audio || ch.audioZh)) out.push({ ci: ci, si: -1 });
+      return out;
+    }
+    function playlistItems(mode) {
+      if (mode === 'chapter') return audioItemsOfChapter(currentChapterIndex);
+      let all = [];
+      for (let c = 0; c < bookData.chapters.length; c++) all = all.concat(audioItemsOfChapter(c));
+      return all;
+    }
+    function nextAudioItem(np, items) {
+      // A chapter-level recording stands for the whole chapter, so move on to the next chapter.
+      if (np.si === -1) return items.find(function(it) { return it.ci > np.ci; }) || null;
+      return items.find(function(it) { return it.ci > np.ci || (it.ci === np.ci && it.si > np.si); }) || null;
+    }
+    function audioCounterText() {
+      const mode = playMode();
+      if (mode === 'section' || !nowPlaying) return '';
+      const items = playlistItems(mode);
+      const idx = items.findIndex(function(it) { return it.ci === nowPlaying.ci && it.si === nowPlaying.si; });
+      return idx >= 0 ? '  ·  ' + (idx + 1) + ' of ' + items.length : '';
+    }
+    function refreshAudioLabel() {
+      if (!currentSectionAudioData) return;
+      let prefix = '';
+      if (playMode() === 'book' && nowPlaying && bookData.chapters[nowPlaying.ci]) prefix = 'Ch. ' + bookData.chapters[nowPlaying.ci].id + ' · ';
+      audioSectionLabel.textContent = prefix + (currentSectionAudioData.heading || '') + audioCounterText();
+    }
+    function scrollToReadingArea() {
+      const anchor = document.getElementById('sectionAudioBar');
+      const bar = document.querySelector('.top-bar');
+      if (!anchor) return;
+      const top = anchor.getBoundingClientRect().top + window.pageYOffset - (bar ? bar.offsetHeight : 0) - 8;
+      if (window.pageYOffset > top) window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+    // Show the chapter / section / page that goes with a recording, load it, and start playing.
+    function playAudioItem(ci, si) {
+      const ch = bookData.chapters[ci];
+      if (!ch) return;
+      if (ci !== currentChapterIndex) {
+        loadChapter(ci);
+        const sel = document.getElementById('chapterSelect');
+        if (sel) sel.value = String(ci);
+      }
+      if (si >= 0 && ch.sections && ch.sections[si]) {
+        if (readingMode === 'sections') {
+          currentSection = si; renderSectionsMode(); saveFullProgress();
+        } else if (readingMode === 'pages') {
+          let before = 0;
+          for (let k = 0; k < si; k++) before += (ch.sections[k].paragraphs || []).length;
+          currentPage = Math.floor(before / PAGE_SIZE);
+          renderPagesMode(); saveFullProgress();
+          loadSectionAudio(ch.sections[si]);   // keep the audio on this section even if the page starts in an earlier one
+        } else {
+          fullAudioSection = si; loadAudioForNonSectionView(true);
+        }
+      } else if (readingMode === 'full') {
+        fullAudioSection = -1; loadAudioForNonSectionView(true);
+      } else {
+        loadSectionAudio(chapterLevelAudio());
+      }
+      if (readingMode !== 'full') scrollToReadingArea();
+      const p = sectionAudio.play();
+      if (p && p.catch) p.catch(function() {
+        audioSectionLabel.textContent += '  —  press ▶ to continue';
+      });
+    }
+    sectionAudio.addEventListener('ended', function() {
+      const mode = playMode();
+      if (mode === 'section' || !nowPlaying) return;
+      const nxt = nextAudioItem(nowPlaying, playlistItems(mode));
+      if (!nxt) {
+        audioSectionLabel.textContent = (mode === 'book') ? '✔ End of the book' : '✔ End of the chapter';
+        return;
+      }
+      playAudioItem(nxt.ci, nxt.si);
+    });
+    sectionAudio.addEventListener('play', refreshAudioLabel);
+    document.getElementById('audioPlayMode').addEventListener('change', refreshAudioLabel);
+
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) { sectionAudio.pause(); if (typeof stopReadAloud === 'function') stopReadAloud(); }
+      // Whole-chapter / whole-book listening keeps playing in the background; single-section playback pauses as before.
+      if (document.hidden) { if (playMode() === 'section') sectionAudio.pause(); if (typeof stopReadAloud === 'function') stopReadAloud(); }
     });
     sectionAudio.addEventListener('play', () => { if (typeof stopReadAloud === 'function') stopReadAloud(); });
 
