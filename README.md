@@ -5,7 +5,7 @@
 
 *Words That Think · 品词坊 · 以词启思*
 
-**▶ Open the reader:** https://dwang055.github.io/[repo-name]/
+**▶ Open the reader:**[https://dwang055.github.io/great-gatsby-bilingual-reader/]
 
 No sign-up, no download and no app needed. It works in any modern browser on a phone, tablet or computer.
 
@@ -23,7 +23,6 @@ No sign-up, no download and no app needed. It works in any modern browser on a p
 | **Test yourself** | Short true/false questions with explanations appear after each section or chapter. |
 | **Highlight and take notes** | Select any text, then choose **🖍 Highlight** or **📝 Note**. Open **📒 My Notes** to see them all. |
 | **Make it comfortable** | **A− / A+** changes the text size. **🌙 Dark Mode** is easier on the eyes at night. |
-| **Print or save as PDF** *(eBook edition only)* | **🖨️ Print** → preview a section, chapter or the whole book, or **Save eBook as PDF**. |
 
 ## How the audio works
 
